@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: devtrend-inblog
+    env: node
+    plan: free
+    buildCommand: "npm install --no-audit --no-fund"
+    startCommand: "npm start"
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: ENABLE_ADMIN_PAGE
+        value: "false"
+      - key: CACHE_TTL_MS
+        value: "30000"
+      - key: PUBLIC_ORIGIN
+        value: "*"
+      - key: NOTION_VERSION
+        value: "2022-06-28"
+      - key: NOTION_TOKEN
+        sync: false
+      - key: NOTION_CATEGORIES_DB_ID
+        sync: false
+      - key: NOTION_ARTICLES_DB_ID
+        sync: false

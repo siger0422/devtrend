@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>inblog x devtrend guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Pretendard:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-dot">i</span>
+        <span class="brand-text">
+          <span class="brand-dev">Dev</span><span class="brand-trend">trend</span>
+          <span class="brand-guide">Guide</span>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input id="searchInput" class="search" type="search" placeholder="아티클 제목, 내용" />
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <nav id="accordion" class="accordion"></nav>
+      </aside>
+
+      <main class="content">
+        <article id="article" class="article"></article>
+      </main>
+
+      <aside class="toc-wrap">
+        <div id="toc" class="toc"></div>
+      </aside>
+    </div>
+
+    <script src="script.js?v=20260213-03"></script>
+  </body>
+</html>

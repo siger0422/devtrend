@@ -1,0 +1,14 @@
+{
+  "name": "devtrend-inblog",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Public Devtrend inblog site backed by Notion API",
+  "main": "notion-inblog-server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node notion-inblog-server.js",
+    "dev": "node notion-inblog-server.js"
+  }
+}
