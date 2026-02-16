@@ -157,9 +157,23 @@ async function fetchContent(force = false) {
   try {
     setStatus('Notion 데이터 동기화 중...');
     const response = await fetch(url, { cache: 'no-store' });
-    const payload = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    const raw = await response.text();
+    let payload = null;
+
+    if (contentType.includes('application/json')) {
+      try {
+        payload = JSON.parse(raw);
+      } catch (_) {
+        throw new Error('API 응답 JSON 파싱 실패');
+      }
+    } else {
+      throw new Error('API 라우트가 배포되지 않았거나 HTML이 반환되었습니다.');
+    }
+
     if (!response.ok || payload.ok === false) {
-      throw new Error(payload.error || `HTTP ${response.status}`);
+      const missing = Array.isArray(payload.missing) ? ` (missing: ${payload.missing.join(', ')})` : '';
+      throw new Error((payload.error || `HTTP ${response.status}`) + missing);
     }
 
     data = {

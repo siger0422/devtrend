@@ -90,9 +90,19 @@ async function loadFromNotionApi(force = false) {
 
   try {
     const response = await fetch(endpoint, { signal: controller.signal, cache: 'no-store' });
-    const payload = await response.json();
-    if (!response.ok) {
-      throw new Error(payload.error || `HTTP ${response.status}`);
+    const contentType = response.headers.get('content-type') || '';
+    const raw = await response.text();
+    let payload = null;
+
+    if (contentType.includes('application/json')) {
+      payload = JSON.parse(raw);
+    } else {
+      throw new Error('API 라우트가 배포되지 않았거나 HTML이 반환되었습니다.');
+    }
+
+    if (!response.ok || payload.ok === false) {
+      const missing = Array.isArray(payload.missing) ? ` (missing: ${payload.missing.join(', ')})` : '';
+      throw new Error((payload.error || `HTTP ${response.status}`) + missing);
     }
 
     data = normalizePayload(payload);
