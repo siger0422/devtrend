@@ -8,6 +8,7 @@
     "node": ">=20"
   },
   "scripts": {
+    "build": "echo \"No build step required\"",
     "start": "node notion-inblog-server.js",
     "dev": "node notion-inblog-server.js"
   }

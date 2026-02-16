@@ -1,5 +1,15 @@
 const SOURCE_KEY = 'inblog_source_mode';
 const API_BASE_KEY = 'inblog_api_base';
+const LOCAL_ADMIN_USER = 'siger0422';
+const LOCAL_ADMIN_PASSWORD = 'lsy741003';
+const AUTH_KEY = 'devtrend_admin_auth_ok';
+
+const loginScreenEl = document.getElementById('loginScreen');
+const adminAppEl = document.getElementById('adminApp');
+const loginFormEl = document.getElementById('loginForm');
+const loginUserEl = document.getElementById('loginUser');
+const loginPasswordEl = document.getElementById('loginPassword');
+const loginErrorEl = document.getElementById('loginError');
 
 const apiBaseInputEl = document.getElementById('apiBaseInput');
 const saveIntegrationBtn = document.getElementById('saveIntegrationBtn');
@@ -13,9 +23,121 @@ const mainViewLinkEl = document.querySelector('.top-actions a');
 
 let data = { groups: [] };
 let selected = { groupId: null, itemId: null };
+let bootstrapped = false;
+
+function showLoginError(message) {
+  loginErrorEl.textContent = message || '아이디 또는 비밀번호가 올바르지 않습니다.';
+  loginErrorEl.classList.remove('hidden');
+}
+
+function hideLoginError() {
+  loginErrorEl.classList.add('hidden');
+}
+
+function showAdminApp() {
+  loginScreenEl.classList.add('hidden');
+  adminAppEl.classList.remove('hidden');
+  if (!bootstrapped) {
+    bootstrapAdmin();
+    bootstrapped = true;
+  }
+}
+
+function verifyLogin(user, password) {
+  return user === LOCAL_ADMIN_USER && password === LOCAL_ADMIN_PASSWORD;
+}
 
 function currentApiBase() {
-  return localStorage.getItem(API_BASE_KEY) || window.location.origin;
+  const saved = normalizeApiBase(localStorage.getItem(API_BASE_KEY) || '');
+  if (saved) return saved;
+  return defaultApiBase();
+}
+
+function defaultApiBase() {
+  const host = window.location.hostname;
+  if (host === '127.0.0.1' || host === 'localhost') {
+    return 'http://127.0.0.1:8787';
+  }
+  return window.location.origin;
+}
+
+function normalizeApiBase(value) {
+  if (!value) return '';
+  const trimmed = String(value).trim();
+  if (!trimmed) return '';
+  return trimmed.replace(/\/+$/, '');
+}
+
+async function probeApiBase(baseUrl) {
+  const base = normalizeApiBase(baseUrl);
+  if (!base) return { ok: false, base, error: 'API 기본값이 비어 있습니다.' };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 2200);
+
+  try {
+    const response = await fetch(`${base}/api/health`, {
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    const bodyText = await response.text();
+    const contentType = response.headers.get('content-type') || '';
+
+    clearTimeout(timer);
+
+    if (!contentType.includes('application/json')) {
+      return {
+        ok: false,
+        base,
+        error: '노션 API가 아닌 HTML이 반환되었습니다.',
+      };
+    }
+
+    const payload = JSON.parse(bodyText || '{}');
+    if (!response.ok || payload?.ok !== true) {
+      return {
+        ok: false,
+        base,
+        error: payload?.error || `HTTP ${response.status}`,
+      };
+    }
+
+    return { ok: true, base };
+  } catch (error) {
+    return {
+      ok: false,
+      base,
+      error: error?.name === 'AbortError' ? '연결 시간이 초과되었습니다.' : String(error.message || error),
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function resolveApiBase() {
+  const saved = normalizeApiBase(localStorage.getItem(API_BASE_KEY) || '');
+  const host = window.location.hostname;
+  const candidateList = [];
+  if (saved) candidateList.push(saved);
+  if (defaultApiBase() !== saved) candidateList.push(defaultApiBase());
+  if ((host === '127.0.0.1' || host === 'localhost') && saved !== 'http://127.0.0.1:8787') {
+    candidateList.push('http://127.0.0.1:8787');
+  }
+  if (window.location.origin && defaultApiBase() !== window.location.origin) {
+    candidateList.push(window.location.origin);
+  }
+
+  const seen = new Set();
+  for (const base of candidateList) {
+    if (!base || seen.has(base)) continue;
+    seen.add(base);
+    const result = await probeApiBase(base);
+    if (result.ok) {
+      localStorage.setItem(API_BASE_KEY, base);
+      return base;
+    }
+  }
+
+  return normalizeApiBase(saved || defaultApiBase());
 }
 
 function forceNotionMode() {
@@ -148,7 +270,9 @@ function ensureSelection() {
 }
 
 async function fetchContent(force = false) {
-  const api = currentApiBase();
+  const api = await resolveApiBase();
+  apiBaseInputEl.value = api;
+  updateMainLink();
   const params = new URLSearchParams();
   if (force) params.set('refresh', '1');
   params.set('_t', String(Date.now()));
@@ -192,41 +316,68 @@ async function fetchContent(force = false) {
 }
 
 async function testHealth() {
-  const api = currentApiBase();
+  const api = await resolveApiBase();
+  apiBaseInputEl.value = api;
   try {
-    setStatus('헬스체크 중...');
-    const response = await fetch(`${api}/api/health`, { cache: 'no-store' });
-    const body = await response.json();
-    if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
-    setStatus(`정상 연결됨 (${body.service}) ${body.now}`);
+    setStatus(`헬스체크 중... (${api})`);
+    const result = await probeApiBase(api);
+    if (!result.ok) throw new Error(result.error);
+    setStatus(`정상 연결됨 (${api})`);
   } catch (error) {
     setStatus(`연결 실패: ${error.message}`);
   }
 }
 
-saveIntegrationBtn.addEventListener('click', () => {
-  persistIntegrationSettings();
-  fetchContent(false);
-});
-
-apiBaseInputEl.addEventListener('change', () => {
-  persistIntegrationSettings();
-});
-
-testHealthBtn.addEventListener('click', testHealth);
-refreshContentBtn.addEventListener('click', () => fetchContent(true));
-
-openMainBtn.addEventListener('click', () => {
-  const href = updateMainLink();
-  window.open(href, '_blank', 'noopener,noreferrer');
-});
-
-window.addEventListener('storage', (event) => {
-  if (event.key === API_BASE_KEY) {
-    renderIntegrationUI();
+function bootstrapAdmin() {
+  saveIntegrationBtn.addEventListener('click', () => {
+    persistIntegrationSettings();
     fetchContent(false);
+  });
+
+  apiBaseInputEl.addEventListener('change', () => {
+    persistIntegrationSettings();
+  });
+
+  testHealthBtn.addEventListener('click', testHealth);
+  refreshContentBtn.addEventListener('click', () => fetchContent(true));
+
+  openMainBtn.addEventListener('click', () => {
+    const href = updateMainLink();
+    window.open(href, '_blank', 'noopener,noreferrer');
+  });
+
+  window.addEventListener('storage', (event) => {
+    if (event.key === API_BASE_KEY) {
+      renderIntegrationUI();
+      fetchContent(false);
+    }
+  });
+
+  renderIntegrationUI();
+  fetchContent(false);
+}
+
+loginFormEl.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const user = loginUserEl.value.trim();
+  const password = loginPasswordEl.value;
+  if (!verifyLogin(user, password)) {
+    showLoginError();
+    loginPasswordEl.value = '';
+    loginPasswordEl.focus();
+    return;
   }
+
+  sessionStorage.setItem(AUTH_KEY, '1');
+  hideLoginError();
+  showAdminApp();
 });
 
-renderIntegrationUI();
-fetchContent(false);
+if (sessionStorage.getItem(AUTH_KEY) === '1') {
+  showAdminApp();
+} else {
+  loginScreenEl.classList.remove('hidden');
+  adminAppEl.classList.add('hidden');
+  hideLoginError();
+  loginUserEl.focus();
+}

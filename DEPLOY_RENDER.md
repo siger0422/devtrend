@@ -23,3 +23,9 @@
 - 배포 완료 후 Render가 발급한 URL이 메인 사이트 주소입니다.
 - 메인 페이지는 `/` 또는 `/index.html`
 - API 헬스체크: `/api/health`
+
+## 5) Admin 보호(권장)
+- Vercel 사용 시 `middleware.js`가 `/admin.html` 접근을 Basic Auth로 보호합니다.
+- 환경변수 추가:
+  - `ADMIN_USER` (예: `devtrend-admin`)
+  - `ADMIN_PASSWORD` (강력한 비밀번호)

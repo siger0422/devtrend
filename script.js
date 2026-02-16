@@ -11,8 +11,87 @@ const query = new URLSearchParams(window.location.search);
 localStorage.setItem(SOURCE_KEY, 'notion');
 if (query.get('api')) localStorage.setItem(API_BASE_KEY, query.get('api'));
 
+function defaultApiBase() {
+  const host = window.location.hostname;
+  if (host === '127.0.0.1' || host === 'localhost') {
+    return 'http://127.0.0.1:8787';
+  }
+  return window.location.origin;
+}
+
+function normalizeApiBase(value) {
+  if (!value) return '';
+  const trimmed = String(value).trim();
+  if (!trimmed) return '';
+  return trimmed.replace(/\/+$/, '');
+}
+
+async function probeApiBase(baseUrl) {
+  const base = normalizeApiBase(baseUrl);
+  if (!base) return { ok: false, base, error: 'base is empty' };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 2200);
+
+  try {
+    const response = await fetch(`${base}/api/health`, {
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    const bodyText = await response.text();
+    const contentType = response.headers.get('content-type') || '';
+
+    if (!contentType.includes('application/json')) {
+      return { ok: false, base, error: 'notion-api-health-html' };
+    }
+
+    const payload = JSON.parse(bodyText || '{}');
+    if (!response.ok || payload?.ok !== true) {
+      return { ok: false, base, error: payload?.error || `HTTP ${response.status}` };
+    }
+
+    return { ok: true, base };
+  } catch (error) {
+    return {
+      ok: false,
+      base,
+      error: error?.name === 'AbortError' ? 'health-timeout' : String(error.message || error),
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function resolveApiBase() {
+  const saved = normalizeApiBase(localStorage.getItem(API_BASE_KEY) || '');
+  const host = window.location.hostname;
+  const candidates = [];
+
+  if (saved) candidates.push(saved);
+  if (defaultApiBase() !== saved) candidates.push(defaultApiBase());
+  if ((host === '127.0.0.1' || host === 'localhost') && !saved.includes('8787')) {
+    candidates.push('http://127.0.0.1:8787');
+  }
+  if (window.location.origin !== defaultApiBase()) {
+    candidates.push(window.location.origin);
+  }
+
+  const seen = new Set();
+  for (const candidate of candidates) {
+    if (!candidate || seen.has(candidate)) continue;
+    seen.add(candidate);
+    const result = await probeApiBase(candidate);
+    if (result.ok) {
+      localStorage.setItem(API_BASE_KEY, candidate);
+      return candidate;
+    }
+  }
+
+  return saved || defaultApiBase();
+}
+
 let sourceMode = localStorage.getItem(SOURCE_KEY) || 'notion';
-let apiBase = localStorage.getItem(API_BASE_KEY) || window.location.origin;
+let apiBase = localStorage.getItem(API_BASE_KEY) || defaultApiBase();
 let notionPollTimer = null;
 
 let data = { version: 1, groups: [] };
@@ -81,6 +160,7 @@ function normalizePayload(payload) {
 }
 
 async function loadFromNotionApi(force = false) {
+  apiBase = await resolveApiBase();
   const params = new URLSearchParams();
   if (force) params.set('refresh', '1');
   params.set('_t', String(Date.now()));
@@ -136,7 +216,7 @@ async function loadFromNotionApi(force = false) {
 function syncRuntimeSettings() {
   sourceMode = 'notion';
   localStorage.setItem(SOURCE_KEY, 'notion');
-  apiBase = localStorage.getItem(API_BASE_KEY) || window.location.origin;
+  apiBase = localStorage.getItem(API_BASE_KEY) || defaultApiBase();
 }
 
 function findGroupAndItem(groupId, itemId) {

@@ -20,6 +20,48 @@ body {
   font-family: Pretendard, system-ui, sans-serif;
 }
 
+.login-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: min(420px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(12, 9, 30, 0.92);
+  padding: 24px;
+}
+
+.login-card h1 {
+  margin: 0 0 8px;
+  font-family: Outfit, sans-serif;
+  font-size: 28px;
+}
+
+.login-card p {
+  margin: 0 0 16px;
+  color: var(--muted);
+}
+
+.login-form {
+  display: grid;
+  gap: 10px;
+}
+
+.login-form label {
+  font-size: 14px;
+  color: #c7d0e7;
+}
+
+.login-error {
+  margin: 2px 0 0;
+  color: var(--danger);
+  font-size: 13px;
+}
+
 .topbar {
   height: 64px;
   border-bottom: 1px solid var(--line);

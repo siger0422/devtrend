@@ -13,38 +13,55 @@
     <link rel="stylesheet" href="admin.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div class="brand"><span>Devtrend Inblog Admin</span></div>
-      <div class="top-actions">
-        <a href="/index.html" target="_blank" rel="noreferrer">메인 보기</a>
+    <section id="loginScreen" class="login-screen">
+      <div class="login-card">
+        <h1>Devtrend Inblog Admin</h1>
+        <p>관리자 로그인</p>
+        <form id="loginForm" class="login-form">
+          <label for="loginUser">아이디</label>
+          <input id="loginUser" type="text" autocomplete="username" required />
+          <label for="loginPassword">비밀번호</label>
+          <input id="loginPassword" type="password" autocomplete="current-password" required />
+          <p id="loginError" class="login-error hidden">아이디 또는 비밀번호가 올바르지 않습니다.</p>
+          <button type="submit">로그인</button>
+        </form>
       </div>
-    </header>
-
-    <section class="integration">
-      <h2>Notion 연동 설정</h2>
-      <div class="integration-row">
-        <input id="apiBaseInput" type="text" placeholder="Notion API 서버 주소 (예: http://127.0.0.1:8787)" />
-        <button id="saveIntegrationBtn">저장</button>
-        <button id="testHealthBtn">헬스체크</button>
-        <button id="refreshContentBtn">동기화 갱신</button>
-        <button id="openMainBtn">메인 테스트 열기</button>
-      </div>
-      <p id="integrationStatus" class="status"></p>
     </section>
 
-    <main class="layout notion-layout">
-      <section class="panel left">
-        <h2>카테고리 / 문서</h2>
-        <p class="hint">문서 작성/수정은 Notion에서 진행하세요. 이 화면은 실시간 반영 확인용입니다.</p>
-        <div id="groupList" class="group-list"></div>
+    <div id="adminApp" class="hidden">
+      <header class="topbar">
+        <div class="brand"><span>Devtrend Inblog Admin</span></div>
+        <div class="top-actions">
+          <a href="/index.html" target="_blank" rel="noreferrer">메인 보기</a>
+        </div>
+      </header>
+
+      <section class="integration">
+        <h2>Notion 연동 설정</h2>
+        <div class="integration-row">
+          <input id="apiBaseInput" type="text" placeholder="Notion API 서버 주소 (예: http://127.0.0.1:8787)" />
+          <button id="saveIntegrationBtn">저장</button>
+          <button id="testHealthBtn">헬스체크</button>
+          <button id="refreshContentBtn">동기화 갱신</button>
+          <button id="openMainBtn">메인 테스트 열기</button>
+        </div>
+        <p id="integrationStatus" class="status"></p>
       </section>
 
-      <section class="panel right">
-        <h2>문서 미리보기</h2>
-        <div id="articlePreview" class="preview empty">좌측에서 문서를 선택해 주세요.</div>
-      </section>
-    </main>
+      <main class="layout notion-layout">
+        <section class="panel left">
+          <h2>카테고리 / 문서</h2>
+          <p class="hint">문서 작성/수정은 Notion에서 진행하세요. 이 화면은 실시간 반영 확인용입니다.</p>
+          <div id="groupList" class="group-list"></div>
+        </section>
 
-    <script src="admin.js?v=20260215-01"></script>
+        <section class="panel right">
+          <h2>문서 미리보기</h2>
+          <div id="articlePreview" class="preview empty">좌측에서 문서를 선택해 주세요.</div>
+        </section>
+      </main>
+    </div>
+
+    <script src="admin.js?v=20260216-02"></script>
   </body>
 </html>
