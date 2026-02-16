@@ -1,0 +1,383 @@
+const SOURCE_KEY = 'inblog_source_mode';
+const API_BASE_KEY = 'inblog_api_base';
+const LOCAL_ADMIN_USER = 'siger0422';
+const LOCAL_ADMIN_PASSWORD = 'lsy741003';
+const AUTH_KEY = 'devtrend_admin_auth_ok';
+
+const loginScreenEl = document.getElementById('loginScreen');
+const adminAppEl = document.getElementById('adminApp');
+const loginFormEl = document.getElementById('loginForm');
+const loginUserEl = document.getElementById('loginUser');
+const loginPasswordEl = document.getElementById('loginPassword');
+const loginErrorEl = document.getElementById('loginError');
+
+const apiBaseInputEl = document.getElementById('apiBaseInput');
+const saveIntegrationBtn = document.getElementById('saveIntegrationBtn');
+const testHealthBtn = document.getElementById('testHealthBtn');
+const refreshContentBtn = document.getElementById('refreshContentBtn');
+const openMainBtn = document.getElementById('openMainBtn');
+const integrationStatusEl = document.getElementById('integrationStatus');
+const groupListEl = document.getElementById('groupList');
+const articlePreviewEl = document.getElementById('articlePreview');
+const mainViewLinkEl = document.querySelector('.top-actions a');
+
+let data = { groups: [] };
+let selected = { groupId: null, itemId: null };
+let bootstrapped = false;
+
+function showLoginError(message) {
+  loginErrorEl.textContent = message || '아이디 또는 비밀번호가 올바르지 않습니다.';
+  loginErrorEl.classList.remove('hidden');
+}
+
+function hideLoginError() {
+  loginErrorEl.classList.add('hidden');
+}
+
+function showAdminApp() {
+  loginScreenEl.classList.add('hidden');
+  adminAppEl.classList.remove('hidden');
+  if (!bootstrapped) {
+    bootstrapAdmin();
+    bootstrapped = true;
+  }
+}
+
+function verifyLogin(user, password) {
+  return user === LOCAL_ADMIN_USER && password === LOCAL_ADMIN_PASSWORD;
+}
+
+function currentApiBase() {
+  const saved = normalizeApiBase(localStorage.getItem(API_BASE_KEY) || '');
+  if (saved) return saved;
+  return defaultApiBase();
+}
+
+function defaultApiBase() {
+  const host = window.location.hostname;
+  if (host === '127.0.0.1' || host === 'localhost') {
+    return 'http://127.0.0.1:8787';
+  }
+  return window.location.origin;
+}
+
+function normalizeApiBase(value) {
+  if (!value) return '';
+  const trimmed = String(value).trim();
+  if (!trimmed) return '';
+  return trimmed.replace(/\/+$/, '');
+}
+
+async function probeApiBase(baseUrl) {
+  const base = normalizeApiBase(baseUrl);
+  if (!base) return { ok: false, base, error: 'API 기본값이 비어 있습니다.' };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 2200);
+
+  try {
+    const response = await fetch(`${base}/api/health`, {
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+    const bodyText = await response.text();
+    const contentType = response.headers.get('content-type') || '';
+
+    clearTimeout(timer);
+
+    if (!contentType.includes('application/json')) {
+      return {
+        ok: false,
+        base,
+        error: '노션 API가 아닌 HTML이 반환되었습니다.',
+      };
+    }
+
+    const payload = JSON.parse(bodyText || '{}');
+    if (!response.ok || payload?.ok !== true) {
+      return {
+        ok: false,
+        base,
+        error: payload?.error || `HTTP ${response.status}`,
+      };
+    }
+
+    return { ok: true, base };
+  } catch (error) {
+    return {
+      ok: false,
+      base,
+      error: error?.name === 'AbortError' ? '연결 시간이 초과되었습니다.' : String(error.message || error),
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function resolveApiBase() {
+  const saved = normalizeApiBase(localStorage.getItem(API_BASE_KEY) || '');
+  const host = window.location.hostname;
+  const candidateList = [];
+  if (saved) candidateList.push(saved);
+  if (defaultApiBase() !== saved) candidateList.push(defaultApiBase());
+  if ((host === '127.0.0.1' || host === 'localhost') && saved !== 'http://127.0.0.1:8787') {
+    candidateList.push('http://127.0.0.1:8787');
+  }
+  if (window.location.origin && defaultApiBase() !== window.location.origin) {
+    candidateList.push(window.location.origin);
+  }
+
+  const seen = new Set();
+  for (const base of candidateList) {
+    if (!base || seen.has(base)) continue;
+    seen.add(base);
+    const result = await probeApiBase(base);
+    if (result.ok) {
+      localStorage.setItem(API_BASE_KEY, base);
+      return base;
+    }
+  }
+
+  return normalizeApiBase(saved || defaultApiBase());
+}
+
+function forceNotionMode() {
+  localStorage.setItem(SOURCE_KEY, 'notion');
+}
+
+function setStatus(message) {
+  integrationStatusEl.textContent = message;
+}
+
+function updateMainLink() {
+  const api = currentApiBase();
+  const encodedApi = encodeURIComponent(api);
+  const href = `/index.html?source=notion&api=${encodedApi}`;
+  if (mainViewLinkEl) mainViewLinkEl.href = href;
+  return href;
+}
+
+function renderIntegrationUI() {
+  forceNotionMode();
+  apiBaseInputEl.value = currentApiBase();
+  updateMainLink();
+}
+
+function persistIntegrationSettings() {
+  const api = apiBaseInputEl.value.trim() || window.location.origin;
+  localStorage.setItem(API_BASE_KEY, api);
+  forceNotionMode();
+  renderIntegrationUI();
+}
+
+function findSelectedItem() {
+  const group = data.groups.find((g) => g.id === selected.groupId);
+  if (!group) return null;
+  return group.items.find((item) => item.id === selected.itemId) || null;
+}
+
+function stripHtml(value) {
+  return String(value || '').replace(/<[^>]+>/g, '').trim();
+}
+
+function renderPreview() {
+  const item = findSelectedItem();
+  if (!item) {
+    articlePreviewEl.classList.add('empty');
+    articlePreviewEl.innerHTML = '좌측에서 문서를 선택해 주세요.';
+    return;
+  }
+
+  const content = item.content || {};
+  const sectionsHtml = (content.sections || [])
+    .map((section) => {
+      const body = section.body_html
+        ? section.body_html
+        : (section.body || '')
+            .split('\n')
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line) => `<p>${line}</p>`)
+            .join('');
+
+      return `
+        <section class="preview-section">
+          <h3>${section.subtitle || ''}</h3>
+          ${body || ''}
+        </section>
+      `;
+    })
+    .join('');
+
+  articlePreviewEl.classList.remove('empty');
+  articlePreviewEl.innerHTML = `
+    <h1>${content.title || item.title}</h1>
+    <p class="preview-lead">${content.lead || ''}</p>
+    <hr />
+    ${sectionsHtml || '<p>본문 블록이 없습니다. Notion 페이지 본문에 heading + paragraph를 추가해 주세요.</p>'}
+  `;
+}
+
+function renderGroups() {
+  groupListEl.innerHTML = '';
+  if (!data.groups.length) {
+    groupListEl.innerHTML = '<div class="empty">로드된 카테고리가 없습니다.</div>';
+    renderPreview();
+    return;
+  }
+
+  data.groups.forEach((group) => {
+    const wrap = document.createElement('section');
+
+    const title = document.createElement('button');
+    title.className = 'list-title';
+    title.textContent = `${group.title} (${group.items.length})`;
+    if (selected.groupId === group.id) title.classList.add('active');
+    title.addEventListener('click', () => {
+      selected.groupId = group.id;
+      selected.itemId = group.items[0]?.id || null;
+      renderGroups();
+      renderPreview();
+    });
+
+    const list = document.createElement('div');
+    list.className = 'item-list';
+    (group.items || []).forEach((item) => {
+      const btn = document.createElement('button');
+      btn.className = 'sub-item';
+      btn.textContent = item.title;
+      if (selected.groupId === group.id && selected.itemId === item.id) btn.classList.add('active');
+      btn.title = stripHtml(item.content?.lead || '');
+      btn.addEventListener('click', () => {
+        selected.groupId = group.id;
+        selected.itemId = item.id;
+        renderGroups();
+        renderPreview();
+      });
+      list.appendChild(btn);
+    });
+
+    wrap.appendChild(title);
+    wrap.appendChild(list);
+    groupListEl.appendChild(wrap);
+  });
+}
+
+function ensureSelection() {
+  const group = data.groups.find((g) => g.id === selected.groupId);
+  if (group && group.items.some((item) => item.id === selected.itemId)) return;
+  selected.groupId = data.groups[0]?.id || null;
+  selected.itemId = data.groups[0]?.items?.[0]?.id || null;
+}
+
+async function fetchContent(force = false) {
+  const api = await resolveApiBase();
+  apiBaseInputEl.value = api;
+  updateMainLink();
+  const params = new URLSearchParams();
+  if (force) params.set('refresh', '1');
+  params.set('_t', String(Date.now()));
+  const url = `${api}/api/inblog/content?${params.toString()}`;
+
+  try {
+    setStatus('Notion 데이터 동기화 중...');
+    const response = await fetch(url, { cache: 'no-store' });
+    const contentType = response.headers.get('content-type') || '';
+    const raw = await response.text();
+    let payload = null;
+
+    if (contentType.includes('application/json')) {
+      try {
+        payload = JSON.parse(raw);
+      } catch (_) {
+        throw new Error('API 응답 JSON 파싱 실패');
+      }
+    } else {
+      throw new Error('API 라우트가 배포되지 않았거나 HTML이 반환되었습니다.');
+    }
+
+    if (!response.ok || payload.ok === false) {
+      const missing = Array.isArray(payload.missing) ? ` (missing: ${payload.missing.join(', ')})` : '';
+      throw new Error((payload.error || `HTTP ${response.status}`) + missing);
+    }
+
+    data = {
+      groups: (payload.groups || []).map((group) => ({
+        ...group,
+        items: group.items || [],
+      })),
+    };
+    ensureSelection();
+    renderGroups();
+    renderPreview();
+    setStatus(`동기화 완료: ${payload.updatedAt}`);
+  } catch (error) {
+    setStatus(`동기화 실패: ${error.message}`);
+  }
+}
+
+async function testHealth() {
+  const api = await resolveApiBase();
+  apiBaseInputEl.value = api;
+  try {
+    setStatus(`헬스체크 중... (${api})`);
+    const result = await probeApiBase(api);
+    if (!result.ok) throw new Error(result.error);
+    setStatus(`정상 연결됨 (${api})`);
+  } catch (error) {
+    setStatus(`연결 실패: ${error.message}`);
+  }
+}
+
+function bootstrapAdmin() {
+  saveIntegrationBtn.addEventListener('click', () => {
+    persistIntegrationSettings();
+    fetchContent(false);
+  });
+
+  apiBaseInputEl.addEventListener('change', () => {
+    persistIntegrationSettings();
+  });
+
+  testHealthBtn.addEventListener('click', testHealth);
+  refreshContentBtn.addEventListener('click', () => fetchContent(true));
+
+  openMainBtn.addEventListener('click', () => {
+    const href = updateMainLink();
+    window.open(href, '_blank', 'noopener,noreferrer');
+  });
+
+  window.addEventListener('storage', (event) => {
+    if (event.key === API_BASE_KEY) {
+      renderIntegrationUI();
+      fetchContent(false);
+    }
+  });
+
+  renderIntegrationUI();
+  fetchContent(false);
+}
+
+loginFormEl.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const user = loginUserEl.value.trim();
+  const password = loginPasswordEl.value;
+  if (!verifyLogin(user, password)) {
+    showLoginError();
+    loginPasswordEl.value = '';
+    loginPasswordEl.focus();
+    return;
+  }
+
+  sessionStorage.setItem(AUTH_KEY, '1');
+  hideLoginError();
+  showAdminApp();
+});
+
+if (sessionStorage.getItem(AUTH_KEY) === '1') {
+  showAdminApp();
+} else {
+  loginScreenEl.classList.remove('hidden');
+  adminAppEl.classList.add('hidden');
+  hideLoginError();
+  loginUserEl.focus();
+}
