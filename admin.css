@@ -84,6 +84,17 @@ body {
   font-size: 14px;
 }
 
+.top-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.top-actions button {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
 .integration {
   border-bottom: 1px solid var(--line);
   padding: 12px 14px;

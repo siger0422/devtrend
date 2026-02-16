@@ -1,12 +1,4 @@
-function unauthorized() {
-  return new Response("Authentication required", {
-    status: 401,
-    headers: {
-      "WWW-Authenticate": 'Basic realm="Devtrend Admin", charset="UTF-8"',
-      "Cache-Control": "no-store",
-    },
-  });
-}
+const COOKIE_NAME = "devtrend_admin_session";
 
 function safeEqual(a, b) {
   const aa = String(a || "");
@@ -19,40 +11,60 @@ function safeEqual(a, b) {
   return out === 0;
 }
 
-export default function middleware(req) {
-  const expectedUser = process.env.ADMIN_USER || "admin";
-  const expectedPassword = process.env.ADMIN_PASSWORD || "";
+function parseCookies(cookieHeader) {
+  const out = {};
+  String(cookieHeader || "")
+    .split(";")
+    .map((v) => v.trim())
+    .filter(Boolean)
+    .forEach((part) => {
+      const idx = part.indexOf("=");
+      if (idx <= 0) return;
+      out[part.slice(0, idx).trim()] = part.slice(idx + 1).trim();
+    });
+  return out;
+}
 
-  // If password env is not configured, keep admin blocked in production.
-  if (!expectedPassword) {
-    return new Response("Admin disabled: set ADMIN_PASSWORD in Vercel env.", {
+function expectedSessionValue() {
+  const user = String(process.env.ADMIN_USER || "");
+  const password = String(process.env.ADMIN_PASSWORD || "");
+  if (!user || !password) return "";
+  const input = `${user}:${password}`;
+  return btoa(input).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function redirectToLogin(req) {
+  const next = encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search);
+  const loginUrl = new URL(`/admin-login.html?next=${next}`, req.url);
+  return Response.redirect(loginUrl, 302);
+}
+
+export default function middleware(req) {
+  const expected = expectedSessionValue();
+  if (!expected) {
+    return new Response("Admin disabled: set ADMIN_USER and ADMIN_PASSWORD in Vercel env.", {
       status: 403,
       headers: { "Cache-Control": "no-store" },
     });
   }
 
-  const auth = req.headers.get("authorization");
-  if (!auth || !auth.startsWith("Basic ")) {
-    return unauthorized();
-  }
-
-  try {
-    const encoded = auth.slice(6);
-    const decoded = atob(encoded);
-    const idx = decoded.indexOf(":");
-    const user = idx >= 0 ? decoded.slice(0, idx) : "";
-    const password = idx >= 0 ? decoded.slice(idx + 1) : "";
-
-    if (!safeEqual(user, expectedUser) || !safeEqual(password, expectedPassword)) {
-      return unauthorized();
+  if (req.nextUrl.pathname === "/admin-login.html") {
+    const cookies = parseCookies(req.headers.get("cookie") || "");
+    if (safeEqual(cookies[COOKIE_NAME] || "", expected)) {
+      return Response.redirect(new URL("/admin.html", req.url), 302);
     }
     return;
-  } catch (_) {
-    return unauthorized();
+  }
+
+  if (req.nextUrl.pathname === "/admin.html") {
+    const cookies = parseCookies(req.headers.get("cookie") || "");
+    if (!safeEqual(cookies[COOKIE_NAME] || "", expected)) {
+      return redirectToLogin(req);
+    }
+    return;
   }
 }
 
 export const config = {
-  matcher: ["/admin.html", "/admin.js", "/admin.css"],
+  matcher: ["/admin.html", "/admin-login.html"],
 };
-

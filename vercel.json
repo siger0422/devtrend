@@ -15,6 +15,15 @@
           "value": "no-store"
         }
       ]
+    },
+    {
+      "source": "/admin-login.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
     }
   ]
 }
