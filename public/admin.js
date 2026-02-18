@@ -1,15 +1,6 @@
 const SOURCE_KEY = 'inblog_source_mode';
 const API_BASE_KEY = 'inblog_api_base';
-const LOCAL_ADMIN_USER = 'siger0422';
-const LOCAL_ADMIN_PASSWORD = 'lsy741003';
-const AUTH_KEY = 'devtrend_admin_auth_ok';
-
-const loginScreenEl = document.getElementById('loginScreen');
-const adminAppEl = document.getElementById('adminApp');
-const loginFormEl = document.getElementById('loginForm');
-const loginUserEl = document.getElementById('loginUser');
-const loginPasswordEl = document.getElementById('loginPassword');
-const loginErrorEl = document.getElementById('loginError');
+const logoutBtn = document.getElementById('logoutBtn');
 
 const apiBaseInputEl = document.getElementById('apiBaseInput');
 const saveIntegrationBtn = document.getElementById('saveIntegrationBtn');
@@ -25,26 +16,11 @@ let data = { groups: [] };
 let selected = { groupId: null, itemId: null };
 let bootstrapped = false;
 
-function showLoginError(message) {
-  loginErrorEl.textContent = message || '아이디 또는 비밀번호가 올바르지 않습니다.';
-  loginErrorEl.classList.remove('hidden');
-}
-
-function hideLoginError() {
-  loginErrorEl.classList.add('hidden');
-}
-
 function showAdminApp() {
-  loginScreenEl.classList.add('hidden');
-  adminAppEl.classList.remove('hidden');
   if (!bootstrapped) {
     bootstrapAdmin();
     bootstrapped = true;
   }
-}
-
-function verifyLogin(user, password) {
-  return user === LOCAL_ADMIN_USER && password === LOCAL_ADMIN_PASSWORD;
 }
 
 function currentApiBase() {
@@ -345,6 +321,16 @@ function bootstrapAdmin() {
     const href = updateMainLink();
     window.open(href, '_blank', 'noopener,noreferrer');
   });
+  logoutBtn?.addEventListener('click', async () => {
+    try {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } finally {
+      window.location.href = '/admin-login.html';
+    }
+  });
 
   window.addEventListener('storage', (event) => {
     if (event.key === API_BASE_KEY) {
@@ -357,27 +343,28 @@ function bootstrapAdmin() {
   fetchContent(false);
 }
 
-loginFormEl.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const user = loginUserEl.value.trim();
-  const password = loginPasswordEl.value;
-  if (!verifyLogin(user, password)) {
-    showLoginError();
-    loginPasswordEl.value = '';
-    loginPasswordEl.focus();
+async function ensureAuthorized() {
+  try {
+    const response = await fetch('/api/admin/session', {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store',
+    });
+    if (!response.ok) {
+      window.location.href = '/admin-login.html?next=%2Fadmin.html';
+      return;
+    }
+    const payload = await response.json();
+    if (!payload?.authenticated) {
+      window.location.href = '/admin-login.html?next=%2Fadmin.html';
+      return;
+    }
+  } catch (_) {
+    window.location.href = '/admin-login.html?next=%2Fadmin.html';
     return;
   }
 
-  sessionStorage.setItem(AUTH_KEY, '1');
-  hideLoginError();
   showAdminApp();
-});
-
-if (sessionStorage.getItem(AUTH_KEY) === '1') {
-  showAdminApp();
-} else {
-  loginScreenEl.classList.remove('hidden');
-  adminAppEl.classList.add('hidden');
-  hideLoginError();
-  loginUserEl.focus();
 }
+
+ensureAuthorized();

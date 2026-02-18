@@ -34,12 +34,15 @@ function expectedSessionValue() {
 }
 
 function redirectToLogin(req) {
-  const next = encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search);
-  const loginUrl = new URL(`/admin-login.html?next=${next}`, req.url);
+  const current = new URL(req.url);
+  const next = encodeURIComponent(current.pathname + current.search);
+  const loginUrl = new URL(`/admin-login.html?next=${next}`, current.origin);
   return Response.redirect(loginUrl, 302);
 }
 
 export default function middleware(req) {
+  const current = new URL(req.url);
+  const pathname = current.pathname;
   const expected = expectedSessionValue();
   if (!expected) {
     return new Response("Admin disabled: set ADMIN_USER and ADMIN_PASSWORD in Vercel env.", {
@@ -48,15 +51,15 @@ export default function middleware(req) {
     });
   }
 
-  if (req.nextUrl.pathname === "/admin-login.html") {
+  if (pathname === "/admin-login.html") {
     const cookies = parseCookies(req.headers.get("cookie") || "");
     if (safeEqual(cookies[COOKIE_NAME] || "", expected)) {
-      return Response.redirect(new URL("/admin.html", req.url), 302);
+      return Response.redirect(new URL("/admin.html", current.origin), 302);
     }
     return;
   }
 
-  if (req.nextUrl.pathname === "/admin.html") {
+  if (pathname === "/admin.html") {
     const cookies = parseCookies(req.headers.get("cookie") || "");
     if (!safeEqual(cookies[COOKIE_NAME] || "", expected)) {
       return redirectToLogin(req);

@@ -1,11 +1,43 @@
+const fs = require("node:fs");
+const path = require("node:path");
+
 const NOTION_TOKEN = process.env.NOTION_TOKEN || "";
 const NOTION_VERSION = process.env.NOTION_VERSION || "2022-06-28";
 const CATEGORIES_DB_ID = process.env.NOTION_CATEGORIES_DB_ID || "";
 const ARTICLES_DB_ID = process.env.NOTION_ARTICLES_DB_ID || "";
 const CACHE_TTL_MS = Number(process.env.CACHE_TTL_MS || 30000);
+const SNAPSHOT_FILE_PATH = path.join(process.cwd(), ".notion-cache.json");
 
 const cache = globalThis.__inblogNotionCache || { at: 0, payload: null, pending: null };
 globalThis.__inblogNotionCache = cache;
+
+function tryLoadSnapshotFile() {
+  try {
+    if (!fs.existsSync(SNAPSHOT_FILE_PATH)) return null;
+    const raw = fs.readFileSync(SNAPSHOT_FILE_PATH, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.groups)) return null;
+    return parsed;
+  } catch (_) {
+    return null;
+  }
+}
+
+function trySaveSnapshotFile(payload) {
+  try {
+    fs.writeFileSync(SNAPSHOT_FILE_PATH, JSON.stringify(payload, null, 2), "utf8");
+  } catch (_) {
+    // ignore on serverless read-only filesystem
+  }
+}
+
+if (!cache.payload) {
+  const bootstrapSnapshot = tryLoadSnapshotFile();
+  if (bootstrapSnapshot) {
+    cache.payload = bootstrapSnapshot;
+    cache.at = 0;
+  }
+}
 
 function missingEnv() {
   const missing = [];
@@ -346,15 +378,7 @@ async function getPayload({ preview = false, force = false } = {}) {
     throw error;
   }
 
-  const now = Date.now();
-  if (!force && cache.payload && now - cache.at < CACHE_TTL_MS && !preview) {
-    return cache.payload;
-  }
-  if (!preview && cache.pending) {
-    return cache.pending;
-  }
-
-  const job = (async () => {
+  const buildFreshPayload = async () => {
     const [rawCategories, rawArticles] = await Promise.all([
       queryAllPages(CATEGORIES_DB_ID),
       queryAllPages(ARTICLES_DB_ID),
@@ -367,9 +391,48 @@ async function getPayload({ preview = false, force = false } = {}) {
     if (!preview) {
       cache.payload = payload;
       cache.at = Date.now();
+      trySaveSnapshotFile(payload);
     }
     return payload;
-  })();
+  };
+
+  if (preview) {
+    return buildFreshPayload();
+  }
+
+  const now = Date.now();
+  if (force) {
+    if (cache.pending) return cache.pending;
+    const forcedJob = buildFreshPayload().finally(() => {
+      cache.pending = null;
+    });
+    cache.pending = forcedJob;
+    return forcedJob;
+  }
+
+  const hasCache = Boolean(cache.payload);
+  const isFresh = hasCache && now - cache.at < CACHE_TTL_MS;
+  if (isFresh) {
+    return cache.payload;
+  }
+
+  // Stale-while-revalidate:
+  // 1) return stale snapshot immediately
+  // 2) refresh in background for the next request
+  if (hasCache) {
+    if (!cache.pending) {
+      cache.pending = buildFreshPayload().finally(() => {
+        cache.pending = null;
+      });
+    }
+    return {
+      ...cache.payload,
+      stale: true,
+      staleReason: "background-refresh",
+    };
+  }
+
+  const job = buildFreshPayload();
 
   if (!preview) cache.pending = job;
   try {

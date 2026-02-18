@@ -1,6 +1,7 @@
 const SOURCE_KEY = 'inblog_source_mode';
 const API_BASE_KEY = 'inblog_api_base';
 const NOTION_CACHE_KEY = 'inblog_notion_cache_v1';
+const INITIAL_FETCH_TIMEOUT_MS = 3500;
 
 const accordionEl = document.getElementById('accordion');
 const articleEl = document.getElementById('article');
@@ -102,6 +103,7 @@ let selected = {
 };
 let syncError = '';
 let hasLoadedFromNotionApi = false;
+let hasResolvedInitialNotionLoad = false;
 
 function escapeHtml(text) {
   return String(text || '')
@@ -166,7 +168,7 @@ async function loadFromNotionApi(force = false) {
   params.set('_t', String(Date.now()));
   const endpoint = `${apiBase}/api/inblog/content?${params.toString()}`;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
+  const timeout = setTimeout(() => controller.abort(), INITIAL_FETCH_TIMEOUT_MS);
 
   try {
     const response = await fetch(endpoint, { signal: controller.signal, cache: 'no-store' });
@@ -209,6 +211,7 @@ async function loadFromNotionApi(force = false) {
     renderAll();
     return false;
   } finally {
+    hasResolvedInitialNotionLoad = true;
     clearTimeout(timeout);
   }
 }
@@ -217,6 +220,19 @@ function syncRuntimeSettings() {
   sourceMode = 'notion';
   localStorage.setItem(SOURCE_KEY, 'notion');
   apiBase = localStorage.getItem(API_BASE_KEY) || defaultApiBase();
+}
+
+function hydrateFromLocalCache() {
+  const cached = localStorage.getItem(NOTION_CACHE_KEY);
+  if (!cached) return false;
+  try {
+    data = normalizePayload(JSON.parse(cached));
+    hasLoadedFromNotionApi = true;
+    hasResolvedInitialNotionLoad = true;
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
 function findGroupAndItem(groupId, itemId) {
@@ -394,6 +410,13 @@ function renderArticle(group, item) {
 }
 
 function renderAll() {
+  if (!hasResolvedInitialNotionLoad) {
+    accordionEl.innerHTML = '<p style="color:#98a7c4;padding:8px;">데이터 불러오는 중...</p>';
+    articleEl.innerHTML = "<h1>데이터를 불러오는 중입니다</h1><p class='lead'>잠시만 기다려 주세요.</p>";
+    tocEl.innerHTML = '';
+    return;
+  }
+
   const filteredGroups = getFilteredData();
 
   if (!filteredGroups.length) {
@@ -420,6 +443,8 @@ function startByMode() {
     notionPollTimer = null;
   }
 
+  // Show last successful snapshot immediately, then refresh in background.
+  hydrateFromLocalCache();
   renderAll();
   loadFromNotionApi(false);
   notionPollTimer = setInterval(() => loadFromNotionApi(false), 60000);
