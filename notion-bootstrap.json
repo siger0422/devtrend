@@ -1,0 +1,1037 @@
+{
+  "version": 1,
+  "source": "notion",
+  "updatedAt": "2026-02-18T09:34:17.893Z",
+  "groups": [
+    {
+      "id": "306e4dbe-4a1f-81af-aa07-c95b202de870",
+      "title": "Devtrend 활용TIP",
+      "slug": "devtrend-활용tip",
+      "order": 1,
+      "visible": true,
+      "description": "",
+      "items": [
+        {
+          "id": "306e4dbe-4a1f-8103-8728-c5e87a95eeda",
+          "title": "첫 미팅 가이드",
+          "slug": "첫-미팅-가이드",
+          "order": 1,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-14T08:39:00.000Z",
+          "content": {
+            "title": "첫 미팅 가이드",
+            "lead": "Devtrend 활용TIP 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "필수적으로 알아주세요",
+                "level": 3,
+                "body_html": "<p>안녕하세요1111</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-8114-8ece-e8a98c0ac492",
+          "title": "프로덕트 초기 가이드",
+          "slug": "프로덕트-초기-가이드",
+          "order": 2,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-15T06:18:00.000Z",
+          "content": {
+            "title": "프로덕트 초기 가이드",
+            "lead": "Devtrend 활용TIP 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "프로덕트 초기 가이드 소개",
+                "level": 3,
+                "body_html": "<p><strong>서비스 시작 확정 직후</strong></p><ul class=\"notion-bulleted\"><li>업무 시작 예정일에 정상적으로 협업이 시작될 수 있도록 계약/결제 절차를 완료해주세요.</li><li>결제 시점 조정이 필요하시다면 원포인트에 편히 말씀해주세요.</li></ul>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "계약/결제 완료 후",
+                "level": 2,
+                "body_html": "<ul class=\"notion-bulleted\"><li>계약/결제 완료 후 전문가님과 커뮤니케이션 채널 및 킥오프 미팅 일자를 논의해주세요.</li><li>킥오프 미팅에서 논의할 아젠다와 사전 공유가 필요한 내용들을 적극적으로 전달해주세요.</li></ul>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "커뮤니케이션 채널 확정 후",
+                "level": 2,
+                "body_html": "<p>고객사/전문가</p><ul class=\"notion-bulleted\"><li>원포인트 <strong>홈페이지 채팅 기능</strong>을 활용해 메일/연락처 등 협업을 위해 필요한 정보를 공유해주세요.</li><li>사전 협의된 게 아니라면, 계약/결제 완료 이전 전문가님의 메일/연락처를 요청할 수 없습니다.</li><li><strong>킥오프 미팅 일정</strong>과 <strong>업무 시작일</strong>을 확정해주세요.</li></ul><p>고객사</p><ul class=\"notion-bulleted\"><li>활용하는 <strong>커뮤니케이션 채널에 전문가를 초대</strong>해주세요.</li><li>킥오프 미팅에서 논의할 아젠다와 사전 공유가 필요한 내용들을 적극적으로 전달해주세요.</li></ul><p>전문가</p><ul class=\"notion-bulleted\"><li>협업이 진행될 <strong>커뮤니케이션 채널에 입장</strong>해주세요.</li><li>확정된 일정에 맞춰 킥오프 미팅이 진행될 <strong>화상 미팅 링크</strong>를 전달해주세요(구글밋, 줌 등).</li><li>킥오프 미팅에서 논의할 아젠다와 사전 공유가 필요한 내용들을 적극적으로 요청해주세요.</li></ul>",
+                "body": ""
+              },
+              {
+                "id": "sec_5",
+                "subtitle": "킥오프 미팅 진행",
+                "level": 2,
+                "body_html": "<ul class=\"notion-bulleted\"><li>사전에 논의된 아젠다를 기반으로 킥오프 미팅을 진행하고, 이후 업무 진행에 필요한 <strong>업무 범위/일정/시간</strong>을 조율해주세요.</li></ul><p>전문가</p><ul class=\"notion-bulleted\"><li>제공되는 킥오프 미팅 템플릿을 참고하여 <strong>업무 및 커뮤니케이션 시간</strong>, <strong>업무 방식</strong>을 확정해주세요.</li></ul>",
+                "body": ""
+              },
+              {
+                "id": "sec_6",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_7",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>Devtrend 활용TIP 관점에서 프로덕트 초기 가이드 적용 여부를 점검합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_8",
+                "subtitle": "실시간 반영 테스트",
+                "level": 3,
+                "body_html": "<p>노션 페이지에서 방금 추가한 본문입니다. 11:34</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-81e1-b6c4-ea28427d68f8",
+          "title": "커뮤니케이션 가이드",
+          "slug": "커뮤니케이션-가이드",
+          "order": 3,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T11:43:00.000Z",
+          "content": {
+            "title": "커뮤니케이션 가이드",
+            "lead": "Devtrend 활용TIP 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "커뮤니케이션 가이드 소개",
+                "level": 3,
+                "body_html": "<p>커뮤니케이션 가이드의 핵심 목적과 활용 배경을 정리합니다.!</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>Devtrend 활용TIP 관점에서 커뮤니케이션 가이드 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "306e4dbe-4a1f-8180-9c81-f7631c8def10",
+      "title": "프로젝트 조정",
+      "slug": "프로젝트-조정",
+      "order": 2,
+      "visible": true,
+      "description": "",
+      "items": [
+        {
+          "id": "306e4dbe-4a1f-814c-b4db-f2e4c12ec472",
+          "title": "연장/종료/홀딩",
+          "slug": "연장종료홀딩",
+          "order": 1,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:07:00.000Z",
+          "content": {
+            "title": "연장/종료/홀딩",
+            "lead": "프로젝트 조정 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "연장/종료/홀딩 소개",
+                "level": 3,
+                "body_html": "<p>연장/종료/홀딩의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>프로젝트 조정 관점에서 연장/종료/홀딩 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-818d-a6eb-f0982ec940bd",
+          "title": "투입시간 조정(상향/하향)",
+          "slug": "투입시간-조정상향하향",
+          "order": 2,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "투입시간 조정(상향/하향)",
+            "lead": "프로젝트 조정 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "투입시간 조정(상향/하향) 소개",
+                "level": 3,
+                "body_html": "<p>투입시간 조정(상향/하향)의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>프로젝트 조정 관점에서 투입시간 조정(상향/하향) 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-819d-9a52-eb272559e49f",
+          "title": "장기 협업(장기계약)",
+          "slug": "장기-협업장기계약",
+          "order": 3,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "장기 협업(장기계약)",
+            "lead": "프로젝트 조정 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "장기 협업(장기계약) 소개",
+                "level": 3,
+                "body_html": "<p>장기 협업(장기계약)의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>프로젝트 조정 관점에서 장기 협업(장기계약) 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-81bb-b97a-d6d64e8929e5",
+          "title": "크리에이터 교체/추가매칭",
+          "slug": "크리에이터-교체추가매칭",
+          "order": 4,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "크리에이터 교체/추가매칭",
+            "lead": "프로젝트 조정 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "크리에이터 교체/추가매칭 소개",
+                "level": 3,
+                "body_html": "<p>크리에이터 교체/추가매칭의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>프로젝트 조정 관점에서 크리에이터 교체/추가매칭 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "306e4dbe-4a1f-817d-b9b1-ed65f6425c6d",
+      "title": "계약/결제",
+      "slug": "계약결제",
+      "order": 3,
+      "visible": true,
+      "description": "",
+      "items": [
+        {
+          "id": "306e4dbe-4a1f-8187-b9a9-fd43024394c0",
+          "title": "계약",
+          "slug": "계약",
+          "order": 1,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "계약",
+            "lead": "계약/결제 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "계약 소개",
+                "level": 3,
+                "body_html": "<p>계약의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>계약/결제 관점에서 계약 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-810d-a780-e77c18fb0a27",
+          "title": "결제",
+          "slug": "결제",
+          "order": 2,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:07:00.000Z",
+          "content": {
+            "title": "결제",
+            "lead": "계약/결제 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "결제 소개",
+                "level": 3,
+                "body_html": "<p>결제의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>계약/결제 관점에서 결제 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-818f-91d8-fc926a125ba7",
+          "title": "성과급",
+          "slug": "성과급",
+          "order": 3,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "성과급",
+            "lead": "계약/결제 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "성과급 소개",
+                "level": 3,
+                "body_html": "<p>성과급의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>계약/결제 관점에서 성과급 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-8161-a212-ef7aed371ad3",
+          "title": "환불",
+          "slug": "환불",
+          "order": 4,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:07:00.000Z",
+          "content": {
+            "title": "환불",
+            "lead": "계약/결제 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "환불 소개",
+                "level": 3,
+                "body_html": "<p>환불의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>계약/결제 관점에서 환불 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "306e4dbe-4a1f-81db-82e4-db80dba1d340",
+      "title": "devtrend 프로세스",
+      "slug": "devtrend-프로세스",
+      "order": 4,
+      "visible": true,
+      "description": "",
+      "items": [
+        {
+          "id": "306e4dbe-4a1f-81f1-956e-db48a5bd5bce",
+          "title": "사전미팅",
+          "slug": "사전미팅",
+          "order": 1,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "사전미팅",
+            "lead": "devtrend 프로세스 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "사전미팅 소개",
+                "level": 3,
+                "body_html": "<p>사전미팅의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>devtrend 프로세스 관점에서 사전미팅 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-815b-9f52-e2823e7d98c6",
+          "title": "마케팅 컨설팅",
+          "slug": "마케팅-컨설팅",
+          "order": 2,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:07:00.000Z",
+          "content": {
+            "title": "마케팅 컨설팅",
+            "lead": "devtrend 프로세스 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "마케팅 컨설팅 소개",
+                "level": 3,
+                "body_html": "<p>마케팅 컨설팅의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>devtrend 프로세스 관점에서 마케팅 컨설팅 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-81fc-a2a1-c9ffbc842da5",
+          "title": "크리에이터 매칭",
+          "slug": "크리에이터-매칭",
+          "order": 3,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "크리에이터 매칭",
+            "lead": "devtrend 프로세스 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "크리에이터 매칭 소개",
+                "level": 3,
+                "body_html": "<p>크리에이터 매칭의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>devtrend 프로세스 관점에서 크리에이터 매칭 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-816e-9678-c944dd6ce5e3",
+          "title": "풀스텍 영상 제작",
+          "slug": "풀스텍-영상-제작",
+          "order": 4,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "풀스텍 영상 제작",
+            "lead": "devtrend 프로세스 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "풀스텍 영상 제작 소개",
+                "level": 3,
+                "body_html": "<p>풀스텍 영상 제작의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>devtrend 프로세스 관점에서 풀스텍 영상 제작 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-81f4-89e5-e245af44bc54",
+          "title": "피드백",
+          "slug": "피드백",
+          "order": 5,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "피드백",
+            "lead": "devtrend 프로세스 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "피드백 소개",
+                "level": 3,
+                "body_html": "<p>피드백의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>devtrend 프로세스 관점에서 피드백 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-811f-85e8-d058bb175baa",
+          "title": "게시 및 데이터 분석",
+          "slug": "게시-및-데이터-분석",
+          "order": 6,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:07:00.000Z",
+          "content": {
+            "title": "게시 및 데이터 분석",
+            "lead": "devtrend 프로세스 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "게시 및 데이터 분석 소개",
+                "level": 3,
+                "body_html": "<p>게시 및 데이터 분석의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>devtrend 프로세스 관점에서 게시 및 데이터 분석 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "306e4dbe-4a1f-8116-aa16-ddfd3917dd15",
+      "title": "크리에이터 매칭 방식",
+      "slug": "크리에이터-매칭-방식",
+      "order": 5,
+      "visible": true,
+      "description": "",
+      "items": [
+        {
+          "id": "306e4dbe-4a1f-812f-91ca-f9bee602a680",
+          "title": "큐레이션",
+          "slug": "큐레이션",
+          "order": 1,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:07:00.000Z",
+          "content": {
+            "title": "큐레이션",
+            "lead": "크리에이터 매칭 방식 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "큐레이션 소개",
+                "level": 3,
+                "body_html": "<p>큐레이션의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>크리에이터 매칭 방식 관점에서 큐레이션 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "306e4dbe-4a1f-811b-acaf-e3c3ec61dd00",
+      "title": "추가 유형",
+      "slug": "추가-유형",
+      "order": 6,
+      "visible": true,
+      "description": "",
+      "items": [
+        {
+          "id": "306e4dbe-4a1f-8167-8aa6-ff38f8f400f7",
+          "title": "CS",
+          "slug": "cs",
+          "order": 1,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:07:00.000Z",
+          "content": {
+            "title": "CS",
+            "lead": "추가 유형 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "CS 소개",
+                "level": 3,
+                "body_html": "<p>CS의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>추가 유형 관점에서 CS 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-81f1-82a1-eae8f929c917",
+          "title": "CPA",
+          "slug": "cpa",
+          "order": 2,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "CPA",
+            "lead": "추가 유형 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "CPA 소개",
+                "level": 3,
+                "body_html": "<p>CPA의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>추가 유형 관점에서 CPA 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-81c1-ae9f-d6cfbe6b7d93",
+          "title": "프로젝트/작업제",
+          "slug": "프로젝트작업제",
+          "order": 3,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "프로젝트/작업제",
+            "lead": "추가 유형 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "프로젝트/작업제 소개",
+                "level": 3,
+                "body_html": "<p>프로젝트/작업제의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>추가 유형 관점에서 프로젝트/작업제 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "306e4dbe-4a1f-8121-aada-e8e47934af27",
+      "title": "FAQ",
+      "slug": "faq",
+      "order": 7,
+      "visible": true,
+      "description": "",
+      "items": [
+        {
+          "id": "306e4dbe-4a1f-81d3-8f43-cac4f266d32e",
+          "title": "자주 묻는 질문",
+          "slug": "자주-묻는-질문",
+          "order": 1,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "자주 묻는 질문",
+            "lead": "FAQ 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "자주 묻는 질문 소개",
+                "level": 3,
+                "body_html": "<p>자주 묻는 질문의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>FAQ 관점에서 자주 묻는 질문 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-8142-9855-e3cb90482a3f",
+          "title": "devtrend , 왜 좋을까요?",
+          "slug": "devtrend-왜-좋을까요",
+          "order": 2,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:07:00.000Z",
+          "content": {
+            "title": "devtrend , 왜 좋을까요?",
+            "lead": "FAQ 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "devtrend , 왜 좋을까요? 소개",
+                "level": 3,
+                "body_html": "<p>devtrend , 왜 좋을까요?의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>FAQ 관점에서 devtrend , 왜 좋을까요? 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-81d9-b88d-df04236f6214",
+          "title": "세금계산서 FAQ",
+          "slug": "세금계산서-faq",
+          "order": 3,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "세금계산서 FAQ",
+            "lead": "FAQ 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "세금계산서 FAQ 소개",
+                "level": 3,
+                "body_html": "<p>세금계산서 FAQ의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>FAQ 관점에서 세금계산서 FAQ 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "306e4dbe-4a1f-814b-b18c-c1d2135ae56a",
+      "title": "프로모션",
+      "slug": "프로모션",
+      "order": 8,
+      "visible": true,
+      "description": "",
+      "items": [
+        {
+          "id": "306e4dbe-4a1f-816a-a542-fd095888c7f4",
+          "title": "Devtrend Risk-Free 프로그램",
+          "slug": "devtrend-risk-free-프로그램",
+          "order": 1,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "Devtrend Risk-Free 프로그램",
+            "lead": "프로모션 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "Devtrend Risk-Free 프로그램 소개",
+                "level": 3,
+                "body_html": "<p>Devtrend Risk-Free 프로그램의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>프로모션 관점에서 Devtrend Risk-Free 프로그램 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        },
+        {
+          "id": "306e4dbe-4a1f-8185-90a2-e484540eb569",
+          "title": "고객 Best Practice(BP) 콘텐츠 안내",
+          "slug": "고객-best-practicebp-콘텐츠-안내",
+          "order": 2,
+          "status": "published",
+          "visible": true,
+          "updatedAt": "2026-02-13T10:08:00.000Z",
+          "content": {
+            "title": "고객 Best Practice(BP) 콘텐츠 안내",
+            "lead": "프로모션 카테고리 문서입니다. 필요한 텍스트를 자유롭게 수정하세요.",
+            "sections": [
+              {
+                "id": "sec_2",
+                "subtitle": "고객 Best Practice(BP) 콘텐츠 안내 소개",
+                "level": 3,
+                "body_html": "<p>고객 Best Practice(BP) 콘텐츠 안내의 핵심 목적과 활용 배경을 정리합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_3",
+                "subtitle": "진행 기준",
+                "level": 3,
+                "body_html": "<p>요청 배경, 기대 결과, 역할 분담을 사전에 합의합니다.</p>",
+                "body": ""
+              },
+              {
+                "id": "sec_4",
+                "subtitle": "실행 체크리스트",
+                "level": 3,
+                "body_html": "<p>프로모션 관점에서 고객 Best Practice(BP) 콘텐츠 안내 적용 여부를 점검합니다.</p>",
+                "body": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

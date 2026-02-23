@@ -1,7 +1,7 @@
 const { getPayload } = require("../_notion.js");
 
 module.exports = async function handler(req, res) {
-  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Cache-Control", "public, max-age=20, stale-while-revalidate=60");
   try {
     const preview = String(req.query.preview || "") === "1";
     const force = String(req.query.refresh || "") === "1";

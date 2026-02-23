@@ -7,6 +7,15 @@ const accordionEl = document.getElementById('accordion');
 const articleEl = document.getElementById('article');
 const tocEl = document.getElementById('toc');
 const searchInputEl = document.getElementById('searchInput');
+const mobileNavToggleEl = document.getElementById('mobileNavToggle');
+const mobileSearchToggleEl = document.getElementById('mobileSearchToggle');
+const mobileNavCloseEl = document.getElementById('mobileNavClose');
+const drawerBackdropEl = document.getElementById('drawerBackdrop');
+const SOCIAL_LINKS = {
+  kakao: 'https://open.kakao.com/',
+  instagram: 'https://www.instagram.com/dev.trend_official/?utm_source=ig_web_button_share_sheet',
+  homepage: 'https://www.devtrend.co.kr/',
+};
 
 const query = new URLSearchParams(window.location.search);
 localStorage.setItem(SOURCE_KEY, 'notion');
@@ -37,7 +46,7 @@ async function probeApiBase(baseUrl) {
   try {
     const response = await fetch(`${base}/api/health`, {
       signal: controller.signal,
-      cache: 'no-store',
+      cache: 'default',
     });
     const bodyText = await response.text();
     const contentType = response.headers.get('content-type') || '';
@@ -105,6 +114,32 @@ let syncError = '';
 let hasLoadedFromNotionApi = false;
 let hasResolvedInitialNotionLoad = false;
 
+function isMobileViewport() {
+  return window.matchMedia('(max-width: 860px)').matches;
+}
+
+function closeMobilePanels() {
+  document.body.classList.remove('mobile-nav-open');
+  document.body.classList.remove('mobile-search-open');
+}
+
+function toggleMobileNav() {
+  if (!isMobileViewport()) return;
+  const willOpen = !document.body.classList.contains('mobile-nav-open');
+  document.body.classList.toggle('mobile-nav-open', willOpen);
+  if (willOpen) document.body.classList.remove('mobile-search-open');
+}
+
+function toggleMobileSearch() {
+  if (!isMobileViewport()) return;
+  const willOpen = !document.body.classList.contains('mobile-search-open');
+  document.body.classList.toggle('mobile-search-open', willOpen);
+  if (willOpen) {
+    document.body.classList.remove('mobile-nav-open');
+    setTimeout(() => searchInputEl?.focus(), 0);
+  }
+}
+
 function escapeHtml(text) {
   return String(text || '')
     .replace(/&/g, '&amp;')
@@ -171,7 +206,7 @@ async function loadFromNotionApi(force = false) {
   const timeout = setTimeout(() => controller.abort(), INITIAL_FETCH_TIMEOUT_MS);
 
   try {
-    const response = await fetch(endpoint, { signal: controller.signal, cache: 'no-store' });
+    const response = await fetch(endpoint, { signal: controller.signal, cache: 'default' });
     const contentType = response.headers.get('content-type') || '';
     const raw = await response.text();
     let payload = null;
@@ -335,6 +370,7 @@ function renderAccordion(filteredGroups) {
 
       itemBtn.addEventListener('click', () => {
         selected = { groupId: group.id, itemId: item.id };
+        if (isMobileViewport()) closeMobilePanels();
         renderAll();
       });
 
@@ -348,16 +384,24 @@ function renderAccordion(filteredGroups) {
 }
 
 function renderToc(sections) {
-  const links = (sections || [])
+  const sectionLinks = (sections || [])
     .map((section) => {
       const id = slugify(section.subtitle);
       return `<a href="#${id}">${escapeHtml(section.subtitle)}</a>`;
     })
     .join('');
 
+  const connectLinks = `
+    <p class="toc-title toc-connect-title">CONNECT</p>
+    <a class="toc-connect-link" href="${SOCIAL_LINKS.homepage}" target="_blank" rel="noreferrer noopener">홈페이지</a>
+    <a class="toc-connect-link" href="${SOCIAL_LINKS.kakao}" target="_blank" rel="noreferrer noopener">카카오톡</a>
+    <a class="toc-connect-link" href="${SOCIAL_LINKS.instagram}" target="_blank" rel="noreferrer noopener">인스타그램</a>
+  `;
+
   tocEl.innerHTML = `
     <p class="toc-title">ON THIS PAGE</p>
-    ${links || "<a href='#'>섹션이 없습니다</a>"}
+    ${sectionLinks || "<a href='#'>섹션이 없습니다</a>"}
+    ${connectLinks}
   `;
 }
 
@@ -434,6 +478,18 @@ function renderAll() {
 }
 
 searchInputEl.addEventListener('input', renderAll);
+mobileNavToggleEl?.addEventListener('click', toggleMobileNav);
+mobileSearchToggleEl?.addEventListener('click', toggleMobileSearch);
+mobileNavCloseEl?.addEventListener('click', closeMobilePanels);
+drawerBackdropEl?.addEventListener('click', closeMobilePanels);
+
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeMobilePanels();
+});
+
+window.addEventListener('resize', () => {
+  if (!isMobileViewport()) closeMobilePanels();
+});
 
 function startByMode() {
   syncRuntimeSettings();

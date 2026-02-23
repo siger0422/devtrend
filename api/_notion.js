@@ -7,14 +7,16 @@ const CATEGORIES_DB_ID = process.env.NOTION_CATEGORIES_DB_ID || "";
 const ARTICLES_DB_ID = process.env.NOTION_ARTICLES_DB_ID || "";
 const CACHE_TTL_MS = Number(process.env.CACHE_TTL_MS || 30000);
 const SNAPSHOT_FILE_PATH = path.join(process.cwd(), ".notion-cache.json");
+const BOOTSTRAP_FILE_PATH = path.join(process.cwd(), "notion-bootstrap.json");
+const BLOCK_FETCH_CONCURRENCY = Number(process.env.BLOCK_FETCH_CONCURRENCY || 5);
 
 const cache = globalThis.__inblogNotionCache || { at: 0, payload: null, pending: null };
 globalThis.__inblogNotionCache = cache;
 
-function tryLoadSnapshotFile() {
+function tryLoadSnapshotFile(filePath) {
   try {
-    if (!fs.existsSync(SNAPSHOT_FILE_PATH)) return null;
-    const raw = fs.readFileSync(SNAPSHOT_FILE_PATH, "utf8");
+    if (!fs.existsSync(filePath)) return null;
+    const raw = fs.readFileSync(filePath, "utf8");
     const parsed = JSON.parse(raw);
     if (!parsed || !Array.isArray(parsed.groups)) return null;
     return parsed;
@@ -32,10 +34,10 @@ function trySaveSnapshotFile(payload) {
 }
 
 if (!cache.payload) {
-  const bootstrapSnapshot = tryLoadSnapshotFile();
+  const bootstrapSnapshot = tryLoadSnapshotFile(BOOTSTRAP_FILE_PATH) || tryLoadSnapshotFile(SNAPSHOT_FILE_PATH);
   if (bootstrapSnapshot) {
     cache.payload = bootstrapSnapshot;
-    cache.at = 0;
+    cache.at = Date.now();
   }
 }
 
@@ -293,14 +295,22 @@ function normalizeCategories(rawPages) {
 }
 
 async function normalizeArticles(rawPages) {
+  const pageIds = rawPages.map((page) => page.id);
+  const blocksResults = await runWithConcurrency(
+    pageIds,
+    async (pageId) => {
+      try {
+        return await getPageBlocks(pageId);
+      } catch (_) {
+        return [];
+      }
+    },
+    BLOCK_FETCH_CONCURRENCY
+  );
+
   const blocksMap = new Map();
-  for (const page of rawPages) {
-    try {
-      blocksMap.set(page.id, await getPageBlocks(page.id));
-      await sleep(80);
-    } catch (_) {
-      blocksMap.set(page.id, []);
-    }
+  for (let i = 0; i < rawPages.length; i += 1) {
+    blocksMap.set(rawPages[i].id, blocksResults[i] || []);
   }
 
   return rawPages.map((page) => {
@@ -368,6 +378,25 @@ function composePayload(categories, articles, preview) {
     updatedAt: new Date().toISOString(),
     groups,
   };
+}
+
+async function runWithConcurrency(items, worker, limit = 5) {
+  if (!Array.isArray(items) || items.length === 0) return [];
+
+  const maxParallel = Math.max(1, Number.isFinite(limit) ? Math.max(1, Math.floor(limit)) : 5);
+  const result = new Array(items.length);
+  let cursor = 0;
+
+  const runners = Array.from({ length: Math.min(maxParallel, items.length) }, () => (async () => {
+    while (true) {
+      const idx = cursor++;
+      if (idx >= items.length) return;
+      result[idx] = await worker(items[idx], idx);
+    }
+  })());
+
+  await Promise.all(runners);
+  return result;
 }
 
 async function getPayload({ preview = false, force = false } = {}) {
