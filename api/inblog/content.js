@@ -17,7 +17,7 @@ function tryReadBootstrap() {
 }
 
 module.exports = async function handler(req, res) {
-  res.setHeader("Cache-Control", "public, max-age=20, stale-while-revalidate=60");
+  res.setHeader("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
   try {
     const published = await getPublished();
     if (published?.payload) {

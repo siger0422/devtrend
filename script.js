@@ -1,6 +1,7 @@
 const SOURCE_KEY = 'inblog_source_mode';
 const API_BASE_KEY = 'inblog_api_base';
 const NOTION_CACHE_KEY = 'inblog_notion_cache_v1';
+const NOTION_BOOTSTRAP_KEY = 'inblog_notion_bootstrap_v1';
 const INITIAL_FETCH_TIMEOUT_MS = 3500;
 
 const accordionEl = document.getElementById('accordion');
@@ -21,9 +22,13 @@ const query = new URLSearchParams(window.location.search);
 localStorage.setItem(SOURCE_KEY, 'notion');
 if (query.get('api')) localStorage.setItem(API_BASE_KEY, query.get('api'));
 
-function defaultApiBase() {
+function isLocalDevHost() {
   const host = window.location.hostname;
-  if (host === '127.0.0.1' || host === 'localhost') {
+  return host === '127.0.0.1' || host === 'localhost';
+}
+
+function defaultApiBase() {
+  if (isLocalDevHost()) {
     return 'http://127.0.0.1:8787';
   }
   return window.location.origin;
@@ -73,16 +78,21 @@ async function probeApiBase(baseUrl) {
 }
 
 async function resolveApiBase() {
+  const queryOverride = normalizeApiBase(query.get('api') || '');
+  if (!isLocalDevHost()) {
+    const fixed = queryOverride || normalizeApiBase(window.location.origin);
+    if (fixed) localStorage.setItem(API_BASE_KEY, fixed);
+    return fixed;
+  }
+
   const saved = normalizeApiBase(localStorage.getItem(API_BASE_KEY) || '');
-  const host = window.location.hostname;
   const candidates = [];
 
   if (saved) candidates.push(saved);
-  if (defaultApiBase() !== saved) candidates.push(defaultApiBase());
-  if ((host === '127.0.0.1' || host === 'localhost') && !saved.includes('8787')) {
+  if (!saved.includes('8787')) {
     candidates.push('http://127.0.0.1:8787');
   }
-  if (window.location.origin !== defaultApiBase()) {
+  if (window.location.origin !== 'http://127.0.0.1:8787') {
     candidates.push(window.location.origin);
   }
 
@@ -97,7 +107,7 @@ async function resolveApiBase() {
     }
   }
 
-  return saved || defaultApiBase();
+  return saved || 'http://127.0.0.1:8787';
 }
 
 let sourceMode = localStorage.getItem(SOURCE_KEY) || 'notion';
@@ -113,6 +123,7 @@ let selected = {
 let syncError = '';
 let hasLoadedFromNotionApi = false;
 let hasResolvedInitialNotionLoad = false;
+let lastRenderedItemId = null;
 
 function isMobileViewport() {
   return window.matchMedia('(max-width: 860px)').matches;
@@ -226,6 +237,9 @@ async function loadFromNotionApi(force = false) {
     syncError = '';
     hasLoadedFromNotionApi = true;
     localStorage.setItem(NOTION_CACHE_KEY, JSON.stringify(data));
+    if (payload.source === 'bootstrap' || payload.source === 'published') {
+      localStorage.setItem(NOTION_BOOTSTRAP_KEY, JSON.stringify(data));
+    }
     renderAll();
     return true;
   } catch (error) {
@@ -254,11 +268,29 @@ async function loadFromNotionApi(force = false) {
 function syncRuntimeSettings() {
   sourceMode = 'notion';
   localStorage.setItem(SOURCE_KEY, 'notion');
-  apiBase = localStorage.getItem(API_BASE_KEY) || defaultApiBase();
+  if (isLocalDevHost()) {
+    apiBase = localStorage.getItem(API_BASE_KEY) || defaultApiBase();
+    return;
+  }
+  apiBase = normalizeApiBase(query.get('api') || '') || normalizeApiBase(window.location.origin);
+  localStorage.setItem(API_BASE_KEY, apiBase);
 }
 
 function hydrateFromLocalCache() {
   const cached = localStorage.getItem(NOTION_CACHE_KEY);
+  if (!cached) return false;
+  try {
+    data = normalizePayload(JSON.parse(cached));
+    hasLoadedFromNotionApi = true;
+    hasResolvedInitialNotionLoad = true;
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function hydrateFromBootstrapCache() {
+  const cached = localStorage.getItem(NOTION_BOOTSTRAP_KEY);
   if (!cached) return false;
   try {
     data = normalizePayload(JSON.parse(cached));
@@ -474,6 +506,11 @@ function renderAll() {
   renderAccordion(filteredGroups);
 
   const { group, item } = findGroupAndItem(selected.groupId, selected.itemId);
+  const hasChangedItem = Boolean(item?.id) && item.id !== lastRenderedItemId;
+  if (hasChangedItem) {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    lastRenderedItemId = item.id;
+  }
   renderArticle(group, item);
 }
 
@@ -500,7 +537,8 @@ function startByMode() {
   }
 
   // Show last successful snapshot immediately, then refresh in background.
-  hydrateFromLocalCache();
+  const hasLocalCache = hydrateFromLocalCache();
+  if (!hasLocalCache) hydrateFromBootstrapCache();
   renderAll();
   loadFromNotionApi(false);
   notionPollTimer = setInterval(() => loadFromNotionApi(false), 60000);

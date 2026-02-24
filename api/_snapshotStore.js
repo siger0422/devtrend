@@ -9,9 +9,12 @@ const mem = globalThis.__inblogSnapshotMem || { published: null, draft: null };
 globalThis.__inblogSnapshotMem = mem;
 
 function getKvConfig() {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "";
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
-  return { enabled: Boolean(url && token), url, token };
+  const rawUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "";
+  const rawToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
+  const url = String(rawUrl || "").trim();
+  const token = String(rawToken || "").trim();
+  const isHttpUrl = /^https?:\/\//i.test(url);
+  return { enabled: Boolean(url && token && isHttpUrl), url, token };
 }
 
 async function kvGet(key) {
@@ -69,13 +72,13 @@ function saveLocalFile() {
 loadLocalFile();
 
 async function getPublished() {
-  const kv = await kvGet(PUBLISHED_KEY);
+  const kv = await kvGet(PUBLISHED_KEY).catch(() => null);
   if (kv) return kv;
   return mem.published;
 }
 
 async function getDraft() {
-  const kv = await kvGet(DRAFT_KEY);
+  const kv = await kvGet(DRAFT_KEY).catch(() => null);
   if (kv) return kv;
   return mem.draft;
 }
@@ -111,4 +114,3 @@ module.exports = {
   setDraft,
   publishDraft,
 };
-
