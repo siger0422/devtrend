@@ -388,6 +388,29 @@ body {
   padding: 0;
 }
 
+[data-notion-color="red"] {
+  color: #ff6b6b;
+}
+
+[data-notion-color="red_background"] {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.16);
+  border-radius: 4px;
+  padding: 0 0.2em;
+}
+
+[data-notion-color="yellow_background"] {
+  background: rgba(250, 204, 21, 0.2);
+  border-radius: 4px;
+  padding: 0 0.2em;
+}
+
+[data-notion-color="blue_background"] {
+  background: rgba(96, 165, 250, 0.2);
+  border-radius: 4px;
+  padding: 0 0.2em;
+}
+
 .notion-toggle {
   margin: 0 0 14px;
   border: 1px solid rgba(255, 255, 255, 0.14);

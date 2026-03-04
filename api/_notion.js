@@ -101,6 +101,9 @@ function richTextToHtml(arr) {
       if (annotations.italic) text = `<em>${text}</em>`;
       if (annotations.underline) text = `<u>${text}</u>`;
       if (annotations.strikethrough) text = `<s>${text}</s>`;
+      if (annotations.color && annotations.color !== "default") {
+        text = `<span data-notion-color="${escapeHtml(annotations.color)}">${text}</span>`;
+      }
       return text;
     })
     .join("");
@@ -192,12 +195,12 @@ async function queryAllPages(databaseId) {
   return pages;
 }
 
-async function getPageBlocks(pageId) {
+async function getBlockChildren(blockId) {
   const blocks = [];
   let cursor = undefined;
   while (true) {
     const payload = await notionFetch(
-      `/v1/blocks/${pageId}/children?page_size=100${cursor ? `&start_cursor=${cursor}` : ""}`
+      `/v1/blocks/${blockId}/children?page_size=100${cursor ? `&start_cursor=${cursor}` : ""}`
     );
     blocks.push(...(payload.results || []));
     if (!payload.has_more) break;
@@ -206,10 +209,86 @@ async function getPageBlocks(pageId) {
   return blocks;
 }
 
+async function hydrateChildren(blocks, depth = 0) {
+  if (!Array.isArray(blocks) || blocks.length === 0) return [];
+  if (depth >= 6) return blocks;
+  return runWithConcurrency(
+    blocks,
+    async (block) => {
+      if (!block?.has_children) return block;
+      try {
+        const children = await getBlockChildren(block.id);
+        const nested = await hydrateChildren(children, depth + 1);
+        return { ...block, children: nested };
+      } catch (_) {
+        return { ...block, children: [] };
+      }
+    },
+    BLOCK_FETCH_CONCURRENCY
+  );
+}
+
+async function getPageBlocks(pageId) {
+  const root = await getBlockChildren(pageId);
+  return hydrateChildren(root, 0);
+}
+
 function getBlockRichText(block) {
   const payload = block[block.type];
   if (!payload) return [];
   return payload.rich_text || [];
+}
+
+function renderListGroupHtml(items, ordered) {
+  if (!items.length) return "";
+  const tag = ordered ? "ol" : "ul";
+  const klass = ordered ? "notion-numbered" : "notion-bulleted";
+  const listItems = items
+    .map((item) => {
+      const text = richTextToHtml(getBlockRichText(item));
+      const nested = renderNestedBlocks(item.children || []);
+      return `<li>${text}${nested}</li>`;
+    })
+    .join("");
+  return `<${tag} class="${klass}">${listItems}</${tag}>`;
+}
+
+function renderNestedBlocks(blocks) {
+  if (!Array.isArray(blocks) || !blocks.length) return "";
+  let html = "";
+  let i = 0;
+  while (i < blocks.length) {
+    const block = blocks[i];
+    if (!block) {
+      i += 1;
+      continue;
+    }
+
+    if (block.type === "bulleted_list_item") {
+      const items = [];
+      while (i < blocks.length && blocks[i].type === "bulleted_list_item") {
+        items.push(blocks[i]);
+        i += 1;
+      }
+      html += renderListGroupHtml(items, false);
+      continue;
+    }
+
+    if (block.type === "numbered_list_item") {
+      const items = [];
+      while (i < blocks.length && blocks[i].type === "numbered_list_item") {
+        items.push(blocks[i]);
+        i += 1;
+      }
+      html += renderListGroupHtml(items, true);
+      continue;
+    }
+
+    const inline = richTextToHtml(getBlockRichText(block));
+    if (inline) html += `<p>${inline}</p>`;
+    i += 1;
+  }
+  return html;
 }
 
 function parseSectionsFromBlocks(blocks, defaultTitle) {
@@ -248,22 +327,22 @@ function parseSectionsFromBlocks(blocks, defaultTitle) {
     }
 
     if (type === "bulleted_list_item") {
-      const lis = [];
+      const items = [];
       while (i < blocks.length && blocks[i].type === "bulleted_list_item") {
-        lis.push(`<li>${richTextToHtml(getBlockRichText(blocks[i]))}</li>`);
+        items.push(blocks[i]);
         i += 1;
       }
-      if (lis.length) current.body_html += `<ul class="notion-bulleted">${lis.join("")}</ul>`;
+      if (items.length) current.body_html += renderListGroupHtml(items, false);
       continue;
     }
 
     if (type === "numbered_list_item") {
-      const lis = [];
+      const items = [];
       while (i < blocks.length && blocks[i].type === "numbered_list_item") {
-        lis.push(`<li>${richTextToHtml(getBlockRichText(blocks[i]))}</li>`);
+        items.push(blocks[i]);
         i += 1;
       }
-      if (lis.length) current.body_html += `<ol class="notion-numbered">${lis.join("")}</ol>`;
+      if (items.length) current.body_html += renderListGroupHtml(items, true);
       continue;
     }
 
