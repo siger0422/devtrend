@@ -124,6 +124,10 @@ let syncError = '';
 let hasLoadedFromNotionApi = false;
 let hasResolvedInitialNotionLoad = false;
 let lastRenderedItemId = null;
+let isBootstrapPending = false;
+let isBootstrapRouteUnavailable = false;
+let contentFetchPromise = null;
+let searchDebounceTimer = null;
 
 function isMobileViewport() {
   return window.matchMedia('(max-width: 860px)').matches;
@@ -207,30 +211,69 @@ function normalizePayload(payload) {
   };
 }
 
-async function loadFromNotionApi(force = false) {
+async function loadFromNotionApi(force = false, options = {}) {
+  if (!force && contentFetchPromise) {
+    return contentFetchPromise;
+  }
+  const task = loadFromNotionApiInternal(force, options);
+  if (!force) contentFetchPromise = task;
+  try {
+    return await task;
+  } finally {
+    if (!force && contentFetchPromise === task) {
+      contentFetchPromise = null;
+    }
+  }
+}
+
+async function loadFromNotionApiInternal(force = false, options = {}) {
+  const { markResolved = true, holdResolveWhileBootstrap = false } = options;
   apiBase = await resolveApiBase();
   const params = new URLSearchParams();
   if (force) params.set('refresh', '1');
-  params.set('_t', String(Date.now()));
-  const endpoint = `${apiBase}/api/inblog/content?${params.toString()}`;
+  if (force || isLocalDevHost()) {
+    params.set('_t', String(Date.now()));
+  }
+  const querySuffix = params.toString() ? `?${params.toString()}` : '';
+
+  const apiEndpoint = `${apiBase}/api/inblog/content${querySuffix}`;
+  const contentJsonEndpoint =
+    !isLocalDevHost() && normalizeApiBase(window.location.origin) === normalizeApiBase(apiBase)
+      ? `${window.location.origin}/content.json${querySuffix}`
+      : '';
+  // In production, prefer content.json first for CDN cache hit.
+  const endpoints = contentJsonEndpoint ? [contentJsonEndpoint, apiEndpoint] : [apiEndpoint];
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), INITIAL_FETCH_TIMEOUT_MS);
 
   try {
-    const response = await fetch(endpoint, { signal: controller.signal, cache: 'default' });
-    const contentType = response.headers.get('content-type') || '';
-    const raw = await response.text();
     let payload = null;
+    let lastError = null;
 
-    if (contentType.includes('application/json')) {
-      payload = JSON.parse(raw);
-    } else {
-      throw new Error('API 라우트가 배포되지 않았거나 HTML이 반환되었습니다.');
+    for (const target of endpoints) {
+      try {
+        const response = await fetch(target, { signal: controller.signal, cache: 'default' });
+        const contentType = response.headers.get('content-type') || '';
+        const raw = await response.text();
+
+        if (!contentType.includes('application/json')) {
+          throw new Error('API 라우트가 배포되지 않았거나 HTML이 반환되었습니다.');
+        }
+
+        const parsed = JSON.parse(raw);
+        if (!response.ok || parsed.ok === false) {
+          const missing = Array.isArray(parsed.missing) ? ` (missing: ${parsed.missing.join(', ')})` : '';
+          throw new Error((parsed.error || `HTTP ${response.status}`) + missing);
+        }
+        payload = parsed;
+        break;
+      } catch (error) {
+        lastError = error;
+      }
     }
 
-    if (!response.ok || payload.ok === false) {
-      const missing = Array.isArray(payload.missing) ? ` (missing: ${payload.missing.join(', ')})` : '';
-      throw new Error((payload.error || `HTTP ${response.status}`) + missing);
+    if (!payload) {
+      throw lastError || new Error('콘텐츠를 불러오지 못했습니다.');
     }
 
     data = normalizePayload(payload);
@@ -260,7 +303,10 @@ async function loadFromNotionApi(force = false) {
     renderAll();
     return false;
   } finally {
-    hasResolvedInitialNotionLoad = true;
+    if (markResolved) {
+      const shouldHold = holdResolveWhileBootstrap && isBootstrapPending;
+      if (!shouldHold) hasResolvedInitialNotionLoad = true;
+    }
     clearTimeout(timeout);
   }
 }
@@ -298,6 +344,28 @@ function hydrateFromBootstrapCache() {
     hasResolvedInitialNotionLoad = true;
     return true;
   } catch (_) {
+    return false;
+  }
+}
+
+async function hydrateFromServerBootstrap() {
+  if (isLocalDevHost()) return false;
+  try {
+    const response = await fetch('/notion-bootstrap.json', { cache: 'force-cache' });
+    if (!response.ok) {
+      isBootstrapRouteUnavailable = true;
+      return false;
+    }
+    const payload = await response.json();
+    data = normalizePayload(payload);
+    hasLoadedFromNotionApi = true;
+    hasResolvedInitialNotionLoad = true;
+    isBootstrapRouteUnavailable = false;
+    localStorage.setItem(NOTION_BOOTSTRAP_KEY, JSON.stringify(data));
+    renderAll();
+    return true;
+  } catch (_) {
+    isBootstrapRouteUnavailable = true;
     return false;
   }
 }
@@ -497,7 +565,15 @@ function renderAll() {
 
   if (!filteredGroups.length) {
     accordionEl.innerHTML = '<p style="color:#98a7c4;padding:8px;">검색 결과가 없습니다.</p>';
-    articleEl.innerHTML = "<h1>검색 결과가 없습니다</h1><p class='lead'>다른 키워드로 검색해 주세요.</p>";
+    if (syncError) {
+      const refreshGuide =
+        isBootstrapRouteUnavailable || !hasLoadedFromNotionApi
+          ? "<p class='lead'>안내: 첫 접속 로딩이 실패하면 새로고침을 1회 해주세요.</p>"
+          : '';
+      articleEl.innerHTML = `<h1>데이터를 불러오지 못했습니다</h1><p class='lead'>${escapeHtml(syncError)}</p>${refreshGuide}`;
+    } else {
+      articleEl.innerHTML = "<h1>검색 결과가 없습니다</h1><p class='lead'>다른 키워드로 검색해 주세요.</p>";
+    }
     tocEl.innerHTML = '';
     return;
   }
@@ -514,7 +590,13 @@ function renderAll() {
   renderArticle(group, item);
 }
 
-searchInputEl.addEventListener('input', renderAll);
+searchInputEl.addEventListener('input', () => {
+  if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(() => {
+    renderAll();
+    searchDebounceTimer = null;
+  }, 120);
+});
 mobileNavToggleEl?.addEventListener('click', toggleMobileNav);
 mobileSearchToggleEl?.addEventListener('click', toggleMobileSearch);
 mobileNavCloseEl?.addEventListener('click', closeMobilePanels);
@@ -535,13 +617,36 @@ function startByMode() {
     clearInterval(notionPollTimer);
     notionPollTimer = null;
   }
+  isBootstrapPending = false;
+  isBootstrapRouteUnavailable = false;
 
-  // Show last successful snapshot immediately, then refresh in background.
+  // 1) Show local snapshot immediately.
   const hasLocalCache = hydrateFromLocalCache();
-  if (!hasLocalCache) hydrateFromBootstrapCache();
-  renderAll();
-  loadFromNotionApi(false);
-  notionPollTimer = setInterval(() => loadFromNotionApi(false), 60000);
+  const hasBootstrapCache = !hasLocalCache && hydrateFromBootstrapCache();
+  if (hasLocalCache || hasBootstrapCache) {
+    hasResolvedInitialNotionLoad = true;
+    renderAll();
+    // Background refresh from API.
+    loadFromNotionApi(false, { markResolved: true });
+  } else {
+    hasResolvedInitialNotionLoad = false;
+    renderAll();
+    // 2) First-time visitor: try static server bootstrap snapshot before API.
+    isBootstrapPending = true;
+    hydrateFromServerBootstrap().finally(() => {
+      isBootstrapPending = false;
+      if (!hasResolvedInitialNotionLoad) {
+        hasResolvedInitialNotionLoad = true;
+        renderAll();
+      }
+    });
+    // While bootstrap is pending, do API refresh in parallel but do not resolve UI first.
+    loadFromNotionApi(false, { markResolved: true, holdResolveWhileBootstrap: true });
+  }
+  notionPollTimer = setInterval(() => {
+    if (document.hidden) return;
+    loadFromNotionApi(false, { markResolved: true });
+  }, 60000);
 }
 
 window.addEventListener('storage', (event) => {

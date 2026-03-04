@@ -2,6 +2,10 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/content.json",
+      "destination": "/api/inblog/content"
+    },
+    {
       "source": "/",
       "destination": "/index.html"
     }
