@@ -388,27 +388,94 @@ body {
   padding: 0;
 }
 
+[data-notion-color="default"] {
+  color: inherit;
+}
+
+[data-notion-color="gray"] {
+  color: #cbd5e1;
+}
+
+[data-notion-color="brown"] {
+  color: #d6ab86;
+}
+
+[data-notion-color="orange"] {
+  color: #fb923c;
+}
+
+[data-notion-color="yellow"] {
+  color: #facc15;
+}
+
+[data-notion-color="green"] {
+  color: #4ade80;
+}
+
+[data-notion-color="blue"] {
+  color: #60a5fa;
+}
+
+[data-notion-color="purple"] {
+  color: #a78bfa;
+}
+
+[data-notion-color="pink"] {
+  color: #f472b6;
+}
+
 [data-notion-color="red"] {
   color: #ff6b6b;
 }
 
-[data-notion-color="red_background"] {
-  color: #ff6b6b;
-  background: rgba(255, 107, 107, 0.16);
+[data-notion-color$="_background"] {
   border-radius: 4px;
   padding: 0 0.2em;
+}
+
+[data-notion-color="gray_background"] {
+  color: #e2e8f0;
+  background: rgba(148, 163, 184, 0.22);
+}
+
+[data-notion-color="brown_background"] {
+  color: #f1d4b3;
+  background: rgba(120, 83, 45, 0.3);
+}
+
+[data-notion-color="orange_background"] {
+  color: #ffd7b0;
+  background: rgba(194, 95, 28, 0.3);
 }
 
 [data-notion-color="yellow_background"] {
-  background: rgba(250, 204, 21, 0.2);
-  border-radius: 4px;
-  padding: 0 0.2em;
+  color: #fff4c7;
+  background: rgba(250, 204, 21, 0.24);
+}
+
+[data-notion-color="green_background"] {
+  color: #d7ffe7;
+  background: rgba(52, 211, 153, 0.24);
 }
 
 [data-notion-color="blue_background"] {
-  background: rgba(96, 165, 250, 0.2);
-  border-radius: 4px;
-  padding: 0 0.2em;
+  color: #dbeafe;
+  background: rgba(96, 165, 250, 0.24);
+}
+
+[data-notion-color="purple_background"] {
+  color: #ede9fe;
+  background: rgba(167, 139, 250, 0.24);
+}
+
+[data-notion-color="pink_background"] {
+  color: #ffe4f2;
+  background: rgba(244, 114, 182, 0.24);
+}
+
+[data-notion-color="red_background"] {
+  color: #ffd4d4;
+  background: rgba(255, 107, 107, 0.22);
 }
 
 .notion-toggle {
