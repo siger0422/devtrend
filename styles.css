@@ -260,6 +260,7 @@ body {
 
 .doc-section {
   margin-bottom: 34px;
+  scroll-margin-top: 84px;
 }
 
 .doc-section h2 {

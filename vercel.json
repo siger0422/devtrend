@@ -2,6 +2,14 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/admin/content",
+      "destination": "/api/admin/content"
+    },
+    {
+      "source": "/notion-bootstrap.json",
+      "destination": "/api/notion-bootstrap"
+    },
+    {
       "source": "/content.json",
       "destination": "/api/inblog/content"
     },

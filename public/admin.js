@@ -6,11 +6,14 @@ const apiBaseInputEl = document.getElementById('apiBaseInput');
 const saveIntegrationBtn = document.getElementById('saveIntegrationBtn');
 const testHealthBtn = document.getElementById('testHealthBtn');
 const refreshContentBtn = document.getElementById('refreshContentBtn');
+const publishContentBtn = document.getElementById('publishContentBtn');
 const openMainBtn = document.getElementById('openMainBtn');
 const integrationStatusEl = document.getElementById('integrationStatus');
 const groupListEl = document.getElementById('groupList');
 const articlePreviewEl = document.getElementById('articlePreview');
 const mainViewLinkEl = document.querySelector('.top-actions a');
+const LOCAL_SESSION_KEY = 'inblog_local_admin_auth';
+const LOCAL_PUBLISHED_SNAPSHOT_KEY = 'inblog_local_published_snapshot';
 
 let data = { groups: [] };
 let selected = { groupId: null, itemId: null };
@@ -35,6 +38,11 @@ function defaultApiBase() {
     return 'http://127.0.0.1:8787';
   }
   return window.location.origin;
+}
+
+function isLocalStaticAdminMode() {
+  const host = window.location.hostname;
+  return (host === '127.0.0.1' || host === 'localhost') && window.location.port === '4173';
 }
 
 function normalizeApiBase(value) {
@@ -125,9 +133,7 @@ function setStatus(message) {
 }
 
 function updateMainLink() {
-  const api = currentApiBase();
-  const encodedApi = encodeURIComponent(api);
-  const href = `/index.html?source=notion&api=${encodedApi}`;
+  const href = '/index.html';
   if (mainViewLinkEl) mainViewLinkEl.href = href;
   return href;
 }
@@ -245,18 +251,22 @@ function ensureSelection() {
   selected.itemId = data.groups[0]?.items?.[0]?.id || null;
 }
 
-async function fetchContent(force = false) {
+async function fetchContent() {
   const api = await resolveApiBase();
   apiBaseInputEl.value = api;
   updateMainLink();
   const params = new URLSearchParams();
-  if (force) params.set('refresh', '1');
   params.set('_t', String(Date.now()));
-  const url = `${api}/api/inblog/content?${params.toString()}`;
+  const url = isLocalStaticAdminMode()
+    ? `${api}/api/inblog/content?${params.toString()}`
+    : '/api/admin/content';
 
   try {
-    setStatus('Notion 데이터 동기화 중...');
-    const response = await fetch(url, { cache: 'no-store' });
+    setStatus('저장된 데이터 로드 중...');
+    const response = await fetch(url, {
+      cache: 'no-store',
+      credentials: isLocalStaticAdminMode() ? 'omit' : 'include',
+    });
     const contentType = response.headers.get('content-type') || '';
     const raw = await response.text();
     let payload = null;
@@ -285,9 +295,99 @@ async function fetchContent(force = false) {
     ensureSelection();
     renderGroups();
     renderPreview();
-    setStatus(`동기화 완료: ${payload.updatedAt}`);
+    setStatus(`로드 완료 (${payload.source || (isLocalStaticAdminMode() ? 'local-notion' : 'unknown')})`);
   } catch (error) {
-    setStatus(`동기화 실패: ${error.message}`);
+    setStatus(`로드 실패: ${error.message}`);
+  }
+}
+
+async function syncFromNotion() {
+  if (isLocalStaticAdminMode()) {
+    const api = await resolveApiBase();
+    const params = new URLSearchParams();
+    params.set('refresh', '1');
+    params.set('_t', String(Date.now()));
+    const url = `${api}/api/inblog/content?${params.toString()}`;
+    try {
+      setStatus('로컬 노션 동기화 중...');
+      const response = await fetch(url, { cache: 'no-store' });
+      const contentType = response.headers.get('content-type') || '';
+      const raw = await response.text();
+      if (!contentType.includes('application/json')) {
+        throw new Error('로컬 Notion API에서 HTML이 반환되었습니다.');
+      }
+      const payload = JSON.parse(raw);
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload.error || `HTTP ${response.status}`);
+      }
+      data = {
+        groups: (payload.groups || []).map((group) => ({
+          ...group,
+          items: group.items || [],
+        })),
+      };
+      ensureSelection();
+      renderGroups();
+      renderPreview();
+      setStatus(`로컬 동기화 완료: ${payload.updatedAt || new Date().toISOString()}`);
+      return;
+    } catch (error) {
+      setStatus(`로컬 동기화 실패: ${error.message}`);
+      return;
+    }
+  }
+
+  try {
+    setStatus('노션에서 초안 동기화 중...');
+    const response = await fetch('/api/admin/sync', {
+      method: 'POST',
+      credentials: 'include',
+      cache: 'no-store',
+    });
+    const payload = await response.json();
+    if (!response.ok || payload.ok === false) {
+      const missing = Array.isArray(payload.missing) ? ` (missing: ${payload.missing.join(', ')})` : '';
+      throw new Error((payload.error || `HTTP ${response.status}`) + missing);
+    }
+    setStatus(`초안 동기화 완료: 문서 ${payload.items}개`);
+    fetchContent(false);
+  } catch (error) {
+    setStatus(`초안 동기화 실패: ${error.message}`);
+  }
+}
+
+async function publishDraft() {
+  if (isLocalStaticAdminMode()) {
+    try {
+      const snapshot = {
+        version: 1,
+        source: 'local-admin-published',
+        publishedAt: new Date().toISOString(),
+        groups: data.groups || [],
+      };
+      localStorage.setItem(LOCAL_PUBLISHED_SNAPSHOT_KEY, JSON.stringify(snapshot));
+      setStatus(`로컬 발행 저장 완료: ${snapshot.publishedAt}`);
+    } catch (error) {
+      setStatus(`로컬 발행 실패: ${error.message}`);
+    }
+    return;
+  }
+
+  try {
+    setStatus('발행 저장 중...');
+    const response = await fetch('/api/admin/publish', {
+      method: 'POST',
+      credentials: 'include',
+      cache: 'no-store',
+    });
+    const payload = await response.json();
+    if (!response.ok || payload.ok === false) {
+      throw new Error(payload.error || `HTTP ${response.status}`);
+    }
+    setStatus(`발행 완료: ${payload.publishedAt}`);
+    fetchContent(false);
+  } catch (error) {
+    setStatus(`발행 실패: ${error.message}`);
   }
 }
 
@@ -315,7 +415,8 @@ function bootstrapAdmin() {
   });
 
   testHealthBtn.addEventListener('click', testHealth);
-  refreshContentBtn.addEventListener('click', () => fetchContent(true));
+  refreshContentBtn.addEventListener('click', syncFromNotion);
+  publishContentBtn?.addEventListener('click', publishDraft);
 
   openMainBtn.addEventListener('click', () => {
     const href = updateMainLink();
@@ -323,6 +424,7 @@ function bootstrapAdmin() {
   });
   logoutBtn?.addEventListener('click', async () => {
     try {
+      sessionStorage.removeItem(LOCAL_SESSION_KEY);
       await fetch('/api/admin/logout', {
         method: 'POST',
         credentials: 'include',
@@ -344,6 +446,12 @@ function bootstrapAdmin() {
 }
 
 async function ensureAuthorized() {
+  const host = window.location.hostname;
+  if ((host === '127.0.0.1' || host === 'localhost') && sessionStorage.getItem(LOCAL_SESSION_KEY) === '1') {
+    showAdminApp();
+    return;
+  }
+
   try {
     const response = await fetch('/api/admin/session', {
       method: 'GET',

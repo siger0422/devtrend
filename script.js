@@ -20,7 +20,7 @@ const SOCIAL_LINKS = {
 
 const query = new URLSearchParams(window.location.search);
 localStorage.setItem(SOURCE_KEY, 'notion');
-if (query.get('api')) localStorage.setItem(API_BASE_KEY, query.get('api'));
+if (isLocalDevHost() && query.get('api')) localStorage.setItem(API_BASE_KEY, query.get('api'));
 
 function isLocalDevHost() {
   const host = window.location.hostname;
@@ -78,9 +78,9 @@ async function probeApiBase(baseUrl) {
 }
 
 async function resolveApiBase() {
-  const queryOverride = normalizeApiBase(query.get('api') || '');
+  const queryOverride = isLocalDevHost() ? normalizeApiBase(query.get('api') || '') : '';
   if (!isLocalDevHost()) {
-    const fixed = queryOverride || normalizeApiBase(window.location.origin);
+    const fixed = normalizeApiBase(window.location.origin);
     if (fixed) localStorage.setItem(API_BASE_KEY, fixed);
     return fixed;
   }
@@ -172,6 +172,21 @@ function slugify(text) {
       .trim()
       .replace(/\s+/g, '-') || 'section'
   );
+}
+
+function buildSectionAnchors(sections) {
+  const used = new Set();
+  return (sections || []).map((section, idx) => {
+    const base = slugify(section.subtitle || `section-${idx + 1}`);
+    let anchor = base;
+    let n = 2;
+    while (used.has(anchor)) {
+      anchor = `${base}-${n}`;
+      n += 1;
+    }
+    used.add(anchor);
+    return { ...section, _anchorId: anchor };
+  });
 }
 
 function normalizePayload(payload) {
@@ -486,7 +501,7 @@ function renderAccordion(filteredGroups) {
 function renderToc(sections) {
   const sectionLinks = (sections || [])
     .map((section) => {
-      const id = slugify(section.subtitle);
+      const id = section._anchorId || slugify(section.subtitle);
       return `<a href="#${id}">${escapeHtml(section.subtitle)}</a>`;
     })
     .join('');
@@ -519,11 +534,11 @@ function renderArticle(group, item) {
   }
 
   const content = item.content || { title: item.title, lead: '', sections: [] };
-  const sections = content.sections || [];
+  const sections = buildSectionAnchors(content.sections || []);
 
   const sectionsHtml = sections
     .map((section) => {
-      const id = slugify(section.subtitle);
+      const id = section._anchorId || slugify(section.subtitle);
       const headingTag = headingTagFromLevel(section.level);
       const paragraphs = section.body_html
         ? section.body_html
